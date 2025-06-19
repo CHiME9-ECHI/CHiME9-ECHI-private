@@ -155,8 +155,8 @@ def evaluate(cfg):
         results_file = cfg.results_file.format(device=device)
         results_file = add_batch_to_results_file_name(results_file, batch)
         evaluate_device(
-            ref_segment_dir,
             segment_dir,
+            ref_segment_dir,
             cfg.signal_id,
             session_device_pid_tuples,
             cfg.score_config,
