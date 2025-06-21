@@ -22,8 +22,6 @@ def validate_signal(
         f"Validating signal for session {session}, device {device}, pid {pid}"
     )
 
-    # Placeholder for actual validation logic
-    # This should include checks for signal integrity, format, etc.
     errors = []
 
     noisy_signal_file = noisy_signal_template.format(
@@ -37,6 +35,8 @@ def validate_signal(
     # This test should pass if CHiME9-ECHI data is installed
     if not Path(noisy_signal_file).exists():
         errors.append(f"Noisy signal file does not exist: {noisy_signal_file}")
+        errors.append("There is an issue with your CHiME9-ECHI data installation.")
+        errors.append("Fix the issue before proceeding with validation.")
         return errors
 
     # Check that the enhanced signal file exists
