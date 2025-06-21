@@ -42,7 +42,7 @@ model:
   input:
     sample_rate: 16000
     channels: ${dataset.signal.n_channels}
-    rms: 0.0
+    rms: 0.05
     use_spkid: true
     type: stft
     stft:
