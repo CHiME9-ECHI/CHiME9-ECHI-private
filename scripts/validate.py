@@ -36,8 +36,8 @@ def validate_signal(
 
     # This test should pass if CHiME9-ECHI data is installed
     if not Path(noisy_signal_file).exists():
-        error_msg = f"Noisy signal file does not exist: {noisy_signal_file}"
-        errors.append(error_msg)
+        errors.append(f"Noisy signal file does not exist: {noisy_signal_file}")
+        return errors
 
     # Check that the enhanced signal file exists
     if not Path(enhanced_signal_file).exists():
