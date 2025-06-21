@@ -44,7 +44,11 @@ def validate_signal(
         error_msg = f"Enhanced signal file does not exist: {enhanced_signal_file}"
         errors.append(error_msg)
 
-    noisy_signal_info = sf.info(noisy_signal_file)
+    try:
+        noisy_signal_info = sf.info(noisy_signal_file)
+    except RuntimeError as e:
+        errors.append(f"Error reading noisy signal file {noisy_signal_file}: {e}")
+        return errors
     try:
         enhanced_signal_info = sf.info(enhanced_signal_file)
     except RuntimeError as e:
