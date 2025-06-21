@@ -123,7 +123,8 @@ def validate(cfg):
 
 @hydra.main(version_base=None, config_path="../config", config_name="main")
 def main(cfg: DictConfig) -> None:
-    validate(cfg.validate)
+    if not validate(cfg.validate):
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
