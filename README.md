@@ -99,7 +99,7 @@ The main configuration files are located in the `config` directory:
 general settings).
 - `prepare.yaml`: Configuration for the data preparation stage (`scripts/prepare.py`).
 - `enhance.yaml`: Configuration for the enhancement stage (`scripts/enhance.py`).
-- `validate.yaml`: Configuration for the validate statge (`scripts/validate.py`).
+- `validate.yaml`: Configuration for the validate stage (`scripts/validate.py`).
 - `evaluate.yaml`: Configuration for the evaluation stage (`scripts/evaluate.py`).
 - `report.yaml`: Configuration for the reporting stage (`scripts/report.py`).
 - `metrics.yaml`: Configuration for the metrics used in evaluation.
