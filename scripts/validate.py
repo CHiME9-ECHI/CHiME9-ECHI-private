@@ -1,4 +1,4 @@
-"""Prepare ECHI data"""
+"""Validation script for ECHI submission."""
 
 import logging
 from pathlib import Path
