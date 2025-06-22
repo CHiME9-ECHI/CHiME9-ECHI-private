@@ -7,7 +7,12 @@ defaults:
   - .@prepare_ref: prepare_ref
   - .@prepare_train: prepare_train
   - .@train: train
+  - .@model: model
   - _self_
+
+wandb:
+  entity: robbiesuth97-university-of-sheffield
+  project: echi-baseline-dev
 
 # Setting up paths for outputs of the experiments
 exp_name: base

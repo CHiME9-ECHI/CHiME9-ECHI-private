@@ -1,5 +1,4 @@
 import torch
-from omegaconf import DictConfig
 from tqdm import tqdm
 import logging
 from torch_stoi import NegSTOILoss
@@ -84,15 +83,14 @@ def check_lengths(
     return processed, target, use_val
 
 
-def run(cfg: DictConfig, paths_cfg):
+def run(paths_cfg, model_cfg, train_cfg, debug, wandb_entity=None, wandb_project=None):
 
     device = get_device()
 
     # Training helper
-    gromit = Helper(cfg)
-
-    model_cfg = cfg.model
-    train_cfg = cfg.trainer
+    gromit = Helper(
+        train_cfg.epochs, train_cfg.loss.name, debug, wandb_entity, wandb_project
+    )
 
     # Model and training bits and bobs
 
@@ -109,24 +107,24 @@ def run(cfg: DictConfig, paths_cfg):
         use_spkid = False
 
     noisy_prepper = AudioPrep(
-        output_channels=cfg.model.input.channels,
+        output_channels=model_cfg.input.channels,
         input_sr=48000,
-        output_sr=cfg.model.input.sample_rate,
-        output_rms=cfg.model.input.rms,
+        output_sr=model_cfg.input.sample_rate,
+        output_rms=model_cfg.input.rms,
         device="cpu",
     )
     target_prepper = AudioPrep(
         output_channels=1,
         input_sr=16000,
-        output_sr=cfg.model.input.sample_rate,
-        output_rms=cfg.model.input.rms,
+        output_sr=model_cfg.input.sample_rate,
+        output_rms=model_cfg.input.rms,
         device="cpu",
     )
     spk_prepper = AudioPrep(
         output_channels=1,
         input_sr=48000,
-        output_sr=cfg.model.input.sample_rate,
-        output_rms=cfg.model.input.rms,
+        output_sr=model_cfg.input.sample_rate,
+        output_rms=model_cfg.input.rms,
         device="cpu",
     )
 
@@ -137,7 +135,7 @@ def run(cfg: DictConfig, paths_cfg):
         paths_cfg.ref_segment_dir,
         paths_cfg.rainbow_signal_dir,
         "data/chime9_echi/sessions.{dataset}.csv",
-        cfg.debug,
+        debug,
         noisy_prepper,
         target_prepper,
         spk_prepper,
@@ -152,7 +150,7 @@ def run(cfg: DictConfig, paths_cfg):
         paths_cfg.ref_segment_dir,
         paths_cfg.rainbow_signal_dir,
         "data/chime9_echi/sessions.{dataset}.csv",
-        cfg.debug,
+        debug,
         noisy_prepper,
         target_prepper,
         spk_prepper,
@@ -161,7 +159,7 @@ def run(cfg: DictConfig, paths_cfg):
     devset = DataLoader(devset, 1, False, num_workers=0, collate_fn=collate_fn)
 
     model = get_model(model_cfg)
-    optimizer = torch.optim.Adam(model.parameters(), lr=cfg.trainer.lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr=train_cfg.lr)
     loss_fn = get_loss(train_cfg.loss.name, train_cfg.loss.kwargs)
     stoi_fn = NegSTOILoss(model_cfg.input.sample_rate).to(device)
     ckpt_interval = train_cfg.checkpoint_interval
@@ -172,10 +170,10 @@ def run(cfg: DictConfig, paths_cfg):
     gromit.start_training()
 
     # Train this fine chap
-    for epoch in range(cfg.trainer.epochs):
+    for epoch in range(train_cfg.epochs):
         model.train()
 
-        if cfg.debug:
+        if debug:
             loader = tqdm(trainset, desc="Training loop")
         else:
             loader = trainset
@@ -244,7 +242,7 @@ def run(cfg: DictConfig, paths_cfg):
 
         if do_checkpoint:
             model.eval()
-            if cfg.debug:
+            if debug:
                 loader = tqdm(devset, desc="Validation loop")
             else:
                 loader = devset
@@ -296,7 +294,7 @@ def run(cfg: DictConfig, paths_cfg):
                         stoi_score = stoi_fn(
                             proc[:length].unsqueeze(0), targ[:length].unsqueeze(0)
                         )
-                        gromit.val_stoi.update(-stoi_score)
+                        gromit.val_stoi.update(-stoi_score[0])
 
                     gromit.val_loss.update(loss.detach())
 
@@ -313,7 +311,3 @@ def run(cfg: DictConfig, paths_cfg):
                     )
 
         gromit.epoch_report(epoch, do_checkpoint, model)
-
-
-if __name__ == "__main__":
-    run()

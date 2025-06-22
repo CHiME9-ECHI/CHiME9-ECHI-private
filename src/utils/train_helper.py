@@ -1,4 +1,3 @@
-from omegaconf import DictConfig, OmegaConf
 from pathlib import Path
 from hydra.core.hydra_config import HydraConfig
 import logging
@@ -13,11 +12,11 @@ from utils.run_names import RUN_NAMES
 
 class LossTracker:
     def __init__(self):
-        self.loss = 0
+        self.loss = torch.tensor(0.0)
         self.steps = 0
         self.history = []
 
-    def update(self, loss: float):
+    def update(self, loss: torch.Tensor):
         self.loss += loss
         self.steps += 1
 
@@ -26,16 +25,18 @@ class LossTracker:
 
     def reset(self, epoch):
         self.history.append((epoch, self.get_average()))
-        self.loss = 0
+        self.loss = torch.tensor(0.0)
         self.steps = 0
 
 
 class Helper:
-    def __init__(self, cfg: DictConfig):
-        self.config = cfg
+    def __init__(self, epochs, loss_name, debug, wandb_entity, wandb_project):
+        self.debug = debug
+        self.epochs = epochs
+        self.loss_name = loss_name
 
-        self.epochs = self.config.trainer.epochs
-        self.loss_name = self.config.trainer.loss.name
+        self.wandb_entity = wandb_entity
+        self.wandb_project = wandb_project
 
         self.train_loss = LossTracker()
         self.val_loss = LossTracker()
@@ -55,7 +56,7 @@ class Helper:
     def write_runname(self):
         pokemon = set(RUN_NAMES)
         hydra_dir = self.output_path.parent
-        other_runs = hydra_dir.glob(f"dataset{self.config.dataset.name}*")
+        other_runs = hydra_dir.glob("*")
 
         used_names = []
         for run in other_runs:
@@ -69,25 +70,22 @@ class Helper:
         if len(available_names) == 0:
             raise ValueError("Run out of names!")
 
-        name = np.random.choice(available_names, 1)
+        name = np.random.choice(available_names, 1)[0]
         write_txt(self.output_path / "name.txt", name)
 
     def start_training(self):
         write_json(self.json_name, [])
 
         run_name = self.output_path.name
+        self.write_pokemon()
 
-        if not self.config.debug:
-            wandb.config = OmegaConf.to_container(
-                self.config, resolve=True, throw_on_missing=True
-            )
+        if not self.debug:
             wandb.init(
-                entity=self.config.wandb.entity,
-                project=self.config.wandb.project,
+                entity=self.wandb_entity,
+                project=self.wandb_project,
                 name=run_name,
                 dir=self.output_path,
             )
-            self.write_pokemon()
 
         logging.info("Training")
 
@@ -132,7 +130,7 @@ class Helper:
         train_log.append(new_log)
         write_json(self.json_name, train_log)
 
-        if not self.config.debug:
+        if not self.debug:
             wandb.log(wlog)
 
     def save_sample(

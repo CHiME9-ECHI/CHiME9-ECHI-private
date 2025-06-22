@@ -1,56 +1,24 @@
-debug: True
-
-model:
-  name: causalmcxtfgridnet
-  input:
-    sample_rate: 16000
-    channels: 7
-    rms: 0.05
-    use_spkid: true
-    type: stft
-    stft:
-      n_fft: 128
-      win_length: 128
-      hop_length: 64
-      window: hann
-  params:
-    n_srcs: 1
-    n_imics: ${train.model.input.channels}
-    n_layers: 3
-    lstm_hidden_units: 128
-    attn_n_head: 4
-    attn_qk_output_channel: 128
-    emb_dim: 48
-    emb_ks: 4
-    emb_hs: 1
-    activation: prelu
-    eps: 1.0e-05
-trainer:
-  name: default
-  epochs: 5
-  checkpoint_interval: 2
-  schedule_lr: false
-  lr: 0.001
-  loss:
-    name: spec
-    kwargs:
-      fft_size: 1024
-      hop_size: 256
-      win_length: 1024
-      window: hann_window
-      w_sc: 1.0
-      w_log_mag: 1.0
-      w_lin_mag: 0.0
-      w_phs: 0.0
-      sample_rate: null
-      scale: null
-      n_bins: null
-      perceptual_weighting: false
-      scale_invariance: false
-      eps: 1.0e-08
-      output: loss
-      reduction: mean
-      mag_distance: L1
-wandb:
-  entity: robbiesuth97-university-of-sheffield
-  project: echi-baseline-dev
+epochs: 5
+checkpoint_interval: 2
+schedule_lr: false
+lr: 0.001
+loss:
+  name: spec
+  kwargs:
+    fft_size: 1024
+    hop_size: 256
+    win_length: 1024
+    window: hann_window
+    w_sc: 1.0
+    w_log_mag: 1.0
+    w_lin_mag: 0.0
+    w_phs: 0.0
+    sample_rate: null
+    scale: null
+    n_bins: null
+    perceptual_weighting: false
+    scale_invariance: false
+    eps: 1.0e-08
+    output: loss
+    reduction: mean
+    mag_distance: L1

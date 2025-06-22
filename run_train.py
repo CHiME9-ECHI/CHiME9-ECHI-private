@@ -21,7 +21,7 @@ def main(cfg):
         prepare(cfg.prepare_train)
 
     if cfg.train.run:
-        run(cfg.train, cfg.paths)
+        run(cfg.paths, cfg.model, cfg.train, True)
 
 
 if __name__ == "__main__":
