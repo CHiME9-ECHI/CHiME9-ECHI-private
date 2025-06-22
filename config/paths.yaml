@@ -19,6 +19,8 @@ signal_dir: ${paths.echi}/{device}/{dataset}
 echi_signal: ${paths.signal_dir}/{session}.{device}.wav
 ref_signal_dir: ${paths.echi}/ref/{dataset}
 ref_signal_file: ${paths.ref_signal_dir}/${paths.signal_id}.wav
+rainbow_signal_dir: ${paths.echi}/participant/{dataset}
+rainbow_signal_file: ${paths.rainbow_signal_dir}/{pid}.wav
 
 # chime9_echi metadata layout
 sessions_file: ${paths.echi}/metadata/sessions.${..shared.dataset}.csv

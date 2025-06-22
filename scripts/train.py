@@ -1,11 +1,11 @@
 import torch
-import hydra
 from omegaconf import DictConfig
 from tqdm import tqdm
 import logging
 from torch_stoi import NegSTOILoss
+from torch.utils.data.dataloader import DataLoader
 
-import dataloaders
+from dataloaders.echi import ECHI, collate_fn
 from models import get_model
 from losses import get_loss
 from utils.misc import check_cfg_item, get_device
@@ -84,15 +84,13 @@ def check_lengths(
     return processed, target, use_val
 
 
-@hydra.main(version_base=None, config_path="../config", config_name="train")
-def run(cfg: DictConfig):
+def run(cfg: DictConfig, paths_cfg):
 
     device = get_device()
 
     # Training helper
     gromit = Helper(cfg)
 
-    data_cfg = cfg.dataset
     model_cfg = cfg.model
     train_cfg = cfg.trainer
 
@@ -112,32 +110,56 @@ def run(cfg: DictConfig):
 
     noisy_prepper = AudioPrep(
         output_channels=cfg.model.input.channels,
-        input_sr=cfg.dataset.signal.noisy_sr,
+        input_sr=48000,
         output_sr=cfg.model.input.sample_rate,
         output_rms=cfg.model.input.rms,
         device="cpu",
     )
     target_prepper = AudioPrep(
         output_channels=1,
-        input_sr=cfg.dataset.signal.ref_sr,
+        input_sr=16000,
         output_sr=cfg.model.input.sample_rate,
         output_rms=cfg.model.input.rms,
         device="cpu",
     )
     spk_prepper = AudioPrep(
         output_channels=1,
-        input_sr=cfg.dataset.signal.spk_sr,
+        input_sr=48000,
         output_sr=cfg.model.input.sample_rate,
         output_rms=cfg.model.input.rms,
         device="cpu",
     )
 
-    trainset, trainsaves = dataloaders.get_data_loader(
-        data_cfg, "train", cfg.debug, noisy_prepper, target_prepper, spk_prepper
+    trainset = ECHI(
+        "train",
+        "aria",
+        paths_cfg.device_segment_dir,
+        paths_cfg.ref_segment_dir,
+        paths_cfg.rainbow_signal_dir,
+        "data/chime9_echi/sessions.{dataset}.csv",
+        cfg.debug,
+        noisy_prepper,
+        target_prepper,
+        spk_prepper,
     )
-    devset, devsaves = dataloaders.get_data_loader(
-        data_cfg, "dev", cfg.debug, noisy_prepper, target_prepper, spk_prepper
+    trainsaves = [trainset.__getitem__(i)["id"] for i in range(3)]
+    trainset = DataLoader(trainset, 1, True, num_workers=0, collate_fn=collate_fn)
+
+    devset = ECHI(
+        "dev",
+        "aria",
+        paths_cfg.device_segment_dir,
+        paths_cfg.ref_segment_dir,
+        paths_cfg.rainbow_signal_dir,
+        "data/chime9_echi/sessions.{dataset}.csv",
+        cfg.debug,
+        noisy_prepper,
+        target_prepper,
+        spk_prepper,
     )
+    devsaves = [devset.__getitem__(i)["id"] for i in range(3)]
+    devset = DataLoader(devset, 1, False, num_workers=0, collate_fn=collate_fn)
+
     model = get_model(model_cfg)
     optimizer = torch.optim.Adam(model.parameters(), lr=cfg.trainer.lr)
     loss_fn = get_loss(train_cfg.loss.name, train_cfg.loss.kwargs)

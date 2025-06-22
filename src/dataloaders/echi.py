@@ -3,6 +3,7 @@ if __name__ == "__main__":
 
     sys.path.append("src")
 
+import soundfile as sf
 import torchaudio
 from pathlib import Path
 from torch.utils.data import Dataset
@@ -12,8 +13,11 @@ from utils.audio_prep import AudioPrep
 from utils.signal_utils import combine_audio_list
 
 
-def collate_fn(batch: list[dict]):
-    new_out = {"id": [x["id"] for x in batch]}
+from typing import Any
+
+
+def collate_fn(batch: list[dict[str, Any]]):
+    new_out: dict[str, Any] = {"id": [x["id"] for x in batch]}
 
     for audio_type in ["noisy", "target", "spk"]:
         audio = [x[audio_type] for x in batch]
@@ -27,40 +31,32 @@ def collate_fn(batch: list[dict]):
 class ECHI(Dataset):
     def __init__(
         self,
-        name,
-        metadata,
-        audio_dir,
-        audio_device,
-        data_split,
-        onesession,
-        debug,
+        subset: str,
+        audio_device: str,
+        noisy_dir: str,
+        ref_dir: str,
+        rainbow_dir: str,
+        sessions_file: str,
+        debug: bool,
         noisy_prep: AudioPrep,
         ref_prep: AudioPrep,
         spk_prep: AudioPrep,
     ):
         super().__init__()
-        self.name = name
-        self.metadata = pd.read_csv(metadata.format(subset=data_split)).dropna(axis=0)
-        self.metadata = self.metadata.to_dict(orient="records")
+        self.subset = subset
         self.audio_device = audio_device
 
-        if onesession:
-            target = "train_14" if data_split == "train" else "dev_02"
-            self.metadata = [x for x in self.metadata if x["session"] == target]
+        self.metadata = (
+            pd.read_csv(sessions_file.format(dataset=subset))
+            .dropna(axis=0)
+            .to_dict(orient="records")
+        )  # type: list[dict]
 
-        self.device_dir = (
-            Path(audio_dir) / f"{self.audio_device}/{data_split}_16k_speech"
-        )
-        self.ref_dir = Path(audio_dir) / f"ref/{data_split}_16k_speech"
-        self.spkid_dir = Path(audio_dir) / f"participant/{data_split}_16k"
-        self.segment_dir = Path(audio_dir) / f"metadata/ref/{data_split}"
+        self.noisy_dir = Path(noisy_dir.format(device=audio_device, dataset=subset))
+        self.ref_dir = Path(ref_dir.format(device=audio_device, dataset=subset))
+        self.spkid_dir = Path(rainbow_dir.format(dataset=subset))
 
         self.segment_samples = 16000 * 4
-        self.trainset = data_split == "train"
-
-        self.device_filestring = "{session}/{session}.{device}.{pid}.{segment}.wav"
-        self.ref_filestring = "{session}/{session}.{device}_ref.{pid}.{segment}.wav"
-        self.segments_filestring = "{session}.{device}.{pid}.csv"
 
         self.preppers = {"noisy": noisy_prep, "target": ref_prep, "spk": spk_prep}
 
@@ -74,41 +70,33 @@ class ECHI(Dataset):
     def make_manifest(self):
         self.manifest = []
 
+        session_wearer_pids = {}
         for meta in self.metadata:
             device_pos = int(meta[f"{self.audio_device}_pos"])
-            session = meta["session"]
-            pids = [meta[f"pos{i}"] for i in range(1, 5) if i != device_pos]
+            session_wearer_pids[meta["session"]] = meta[f"pos{device_pos}"]
 
-            if not self.check_spkids(pids):
-                # Ignore whole session if spkid passage doesn't exist
+        noisy_files = self.noisy_dir.glob("*")
+        for noisy in noisy_files:
+            session, _, pid, _, _ = noisy.name.split(".")
+            if pid == session_wearer_pids[session]:
+                # Skip files where the speech is from the device wearer
                 continue
-            for pid in pids:
-                segment_fpath = self.segment_dir / self.segments_filestring.format(
-                    session=session, device=self.audio_device, pid=pid
-                )
-                if not segment_fpath.exists():
-                    continue
-                segments = pd.read_csv(
-                    self.segment_dir
-                    / self.segments_filestring.format(
-                        session=meta["session"], device=self.audio_device, pid=pid
-                    ),
-                    header=None,
-                ).values.tolist()
-                for seg_id, start, end in segments:
-                    seg_id = str(seg_id).zfill(3)
-                    if not self.check_segments(session, pid, seg_id):
-                        continue
-                    elif (end - start) / 16000 < 1:
-                        continue
-                    self.manifest.append(
-                        {
-                            "id": f"{session}.{pid}.{seg_id}",
-                            "noisy": self.get_device_fpath(session, pid, seg_id),
-                            "target": self.get_ref_fpath(session, pid, seg_id),
-                            "spk": self.get_spkid_path(pid),
-                        }
-                    )
+            ref = self.ref_dir / noisy.name
+            rainbow = self.spkid_dir / f"{pid}.wav"
+
+            if not ref.exists() or not rainbow.exists():
+                # print(ref, ref.exists())
+                # print(rainbow, rainbow.exists())
+                continue
+
+            with sf.SoundFile(str(noisy)) as file:
+                dur = file.frames / file.samplerate
+            if dur < 1:
+                continue
+
+            self.manifest.append(
+                {"id": noisy.name, "noisy": noisy, "target": ref, "spk": rainbow}
+            )
 
     def __getitem__(self, index):
         meta = self.manifest[index]
@@ -120,11 +108,8 @@ class ECHI(Dataset):
             prep = self.preppers[audio_type]  # type: AudioPrep
             audio = prep.process(audio, fs)
 
-            if (
-                audio.shape[-1] > self.segment_samples
-                and audio_type != "spk"
-                and self.trainset
-            ):
+            if audio.shape[-1] > self.segment_samples and audio_type != "spk":
+                # Cut segments short to avoid memory issues
                 audio = audio[..., : self.segment_samples]
 
             out[audio_type] = audio
@@ -133,29 +118,3 @@ class ECHI(Dataset):
 
     def __len__(self):
         return len(self.manifest)
-
-    def get_device_fpath(self, sess_id, pid, seg_id):
-        return self.device_dir / self.device_filestring.format(
-            session=sess_id, device=self.audio_device, pid=pid, segment=seg_id
-        )
-
-    def get_ref_fpath(self, sess_id, pid, seg_id):
-        return self.ref_dir / self.ref_filestring.format(
-            session=sess_id, device=self.audio_device, pid=pid, segment=seg_id
-        )
-
-    def get_spkid_path(self, pid):
-        return self.spkid_dir / f"{pid}.wav"
-
-    def check_spkids(self, pids):
-        good = True
-        for pid in pids:
-            if not self.get_spkid_path(pid).exists():
-                good = False
-                break
-        return good
-
-    def check_segments(self, sess_id, pid, seg_id):
-        device = self.get_device_fpath(sess_id, pid, seg_id).exists()
-        ref = self.get_ref_fpath(sess_id, pid, seg_id).exists()
-        return device and ref

@@ -6,6 +6,7 @@ defaults:
   - .@shared: shared
   - .@prepare_ref: prepare_ref
   - .@prepare_train: prepare_train
+  - .@train: train
   - _self_
 
 # Setting up paths for outputs of the experiments
@@ -22,6 +23,10 @@ hydra:
 # This can be also done from command-line when running the script, e.g.
 # python run.py prepare_data.run=false
 prepare_ref:
-  run: true
+  run: false
+  for_eval: false
 prepare_train:
+  run: false
+  for_eval: false
+train:
   run: true

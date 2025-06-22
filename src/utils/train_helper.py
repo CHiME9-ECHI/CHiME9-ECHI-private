@@ -52,9 +52,6 @@ class Helper:
         self.ckpt_dir = self.output_path / "checkpoints"
         self.ckpt_dir.mkdir(parents=True, exist_ok=True)
 
-        self.tracker_path = Path(self.config.run_tracker)
-        self.tracker_index = None
-
     def write_runname(self):
         pokemon = set(RUN_NAMES)
         hydra_dir = self.output_path.parent
@@ -92,9 +89,7 @@ class Helper:
             )
             self.write_pokemon()
 
-        logging.info(
-            f"Training {self.config.experiment_name} under run-name {run_name}"
-        )
+        logging.info("Training")
 
     def epoch_report(self, epoch, do_ckpt, model: torch.nn.Module, delim=" "):
 

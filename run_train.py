@@ -7,6 +7,7 @@ import hydra
 from omegaconf import OmegaConf
 
 from scripts.prepare import prepare
+from scripts.train import run
 
 
 @hydra.main(version_base=None, config_path="config", config_name="main_train")
@@ -18,6 +19,9 @@ def main(cfg):
 
     if cfg.prepare_train.run:
         prepare(cfg.prepare_train)
+
+    if cfg.train.run:
+        run(cfg.train, cfg.paths)
 
 
 if __name__ == "__main__":
