@@ -26,8 +26,8 @@ def main(cfg):
     if cfg.validate.run:
         status = validate(cfg.validate)
         if not status:
-        # The validate function logs detailed errors, so we just exit with a failure code.
-        raise SystemExit(1)
+            # The validate function logs detailed errors, so we just exit with a failure code.
+            raise SystemExit(1)
 
     if cfg.evaluate.run:
         evaluate(cfg.evaluate)

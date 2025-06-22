@@ -21,7 +21,7 @@ def prepare(cfg):
             signal_dir=signal_dir,
             segment_info_dir=segment_info_dir,
             output_dir=output_dir,
-            filter=f"*{device}*P*",
+            file_pattern=f"*{device}*P*",
         )
 
 

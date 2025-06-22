@@ -25,12 +25,12 @@ hydra:
 # This can be also done from command-line when running the script, e.g.
 # python run.py prepare_data.run=false
 prepare:
-  run: false
-validate:
   run: true
+validate:
+  run: false
 enhance:
   run: false
 evaluate:
-  run: true
+  run: false
 report:
   run: false

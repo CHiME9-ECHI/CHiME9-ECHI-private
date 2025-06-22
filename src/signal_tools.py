@@ -86,32 +86,32 @@ def segment_signal(wav_file: Path, csv_file: Path, output_dir: Path) -> None:
             sf.write(f, signal_segment, samplerate=fs)
 
 
-def wav_to_csv(name: str) -> str:
+def csv_to_wav(name: str) -> str:
     """Replace .wav with .csv"""
-    return ".".join(name.split(".")[:-1]) + ".csv"
+    return ".".join(name.split(".")[:-1]) + ".wav"
 
 
 def segment_signal_dir(
     signal_dir: Path | str,
     segment_info_dir: Path | str,
     output_dir: Path | str,
-    filter: str = "*",
+    file_pattern: str = "*",
     translate: Optional[Callable[[str], str]] = None,
 ) -> None:
     """Extract speech segments from all signals in a directory"""
     logging.info("Segmenting signals...")
     if translate is None:
-        translate = wav_to_csv
+        translate = csv_to_wav
 
     output_dir = Path(output_dir)
     if not output_dir.exists():
         output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Find all the wav files to process...
-    wav_files = list(Path(signal_dir).glob(filter))
-    # ... and find their corresponding csv segmentation files
-    csv_files = [
-        Path(segment_info_dir) / translate(str(wav_file.name)) for wav_file in wav_files
+    # Find all the csv segmentation files to process...
+    csv_files = list(Path(segment_info_dir).glob(file_pattern))
+    # ... and find their corresponding wav files
+    wav_files = [
+        Path(signal_dir) / translate(str(csv_file.name)) for csv_file in csv_files
     ]
 
     n_files = len(wav_files)

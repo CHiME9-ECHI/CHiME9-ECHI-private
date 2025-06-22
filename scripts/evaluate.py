@@ -154,7 +154,9 @@ def evaluate(cfg):
 
         segment_dir = cfg.segment_dir.format(device=device)
         logging.info(f"Segment {device} signals into {segment_dir}")
-        segment_signal_dir(signal_dir, cfg.csv_dir, segment_dir, filter=f"*{device}*P*")
+        segment_signal_dir(
+            signal_dir, cfg.csv_dir, segment_dir, file_pattern=f"*{device}*P*"
+        )
 
         logging.info(f"Evaluating {device} segments")
         ref_segment_dir = cfg.ref_segment_dir.format(dataset=cfg.dataset, device=device)
