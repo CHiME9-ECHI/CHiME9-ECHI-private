@@ -77,7 +77,7 @@ class Helper:
         write_json(self.json_name, [])
 
         run_name = self.output_path.name
-        self.write_pokemon()
+        self.write_runname()
 
         if not self.debug:
             wandb.init(
@@ -146,11 +146,13 @@ class Helper:
             audio_dir = self.train_sampledir
         elif split == "dev":
             audio_dir = self.dev_sampledir
+        else:
+            raise ValueError(f"Unknown split: {split}")
 
         audio_fname = f"{scene}_{audio_type}.wav"
         if audio_type == "proc":
             audio_fname = f"epoch{str(epoch).zfill(3)}_" + audio_fname
-        audio_path = audio_path = str(audio_dir / audio_fname)
+        audio_path = str(audio_dir / audio_fname)
 
         if sample.ndim == 1:
             sample = sample.unsqueeze(0)
