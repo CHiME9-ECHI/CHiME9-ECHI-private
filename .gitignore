@@ -1,11 +1,14 @@
 # uv lock file - ignore for now
 uv.lock
 
+.vscode
+
 # Scratch code
 scratch/
 
-# Data storage
+# Data folders
 data/*/
+exp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

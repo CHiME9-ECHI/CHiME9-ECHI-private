@@ -4,7 +4,7 @@ import csv
 import itertools
 import logging
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Optional
 
 import soundfile as sf
 from tqdm import tqdm
@@ -31,6 +31,13 @@ def get_session_tuples(session_file, devices, datasets=None):
     return session_device_pid_tuples
 
 
+def wav_file_name(
+    output_dir: Path, stem: str, index: int, start_sample: int, end_sample: int
+) -> Path:
+    """Construct the wav file name based on session, device, and pid."""
+    return Path(output_dir) / f"{stem}.{index:03g}.{start_sample}_{end_sample}.wav"
+
+
 def segment_signal(wav_file: Path, csv_file: Path, output_dir: Path) -> None:
     """Extract speech segments from a signal"""
     logging.debug(f"Segmenting {wav_file} {csv_file}")
@@ -42,8 +49,14 @@ def segment_signal(wav_file: Path, csv_file: Path, output_dir: Path) -> None:
 
     # check if any files missing:
     files_missing = False
-    for index, segment in enumerate(segments, start=1):
-        expected_files = Path(output_dir) / f"{csv_file.stem}.{index:03g}.wav"
+    for segment in segments:
+        expected_files = wav_file_name(
+            output_dir,
+            csv_file.stem,
+            int(segment["index"]),
+            int(segment["start"]),
+            int(segment["end"]),
+        )
         if not expected_files.exists():
             files_missing = True
             break
@@ -54,44 +67,58 @@ def segment_signal(wav_file: Path, csv_file: Path, output_dir: Path) -> None:
     with open(wav_file, "rb") as f:
         signal, fs = sf.read(f)
 
-    for index, segment in enumerate(segments, start=1):
-        output_file = Path(output_dir) / f"{csv_file.stem}.{index:03g}.wav"
+    for segment in segments:
+        index = int(segment["index"])
+        start_sample = int(segment["start"])
+        end_sample = int(segment["end"])
+
+        output_file = wav_file_name(
+            output_dir, csv_file.stem, index, start_sample, end_sample
+        )
         if output_file.exists():
             logging.debug(f"Segment {output_file} already exists, skipping")
             continue
-        start_sample = int(segment["start"])
-        end_sample = int(segment["end"])
+        if end_sample > len(signal):
+            logging.warning(f"Segment {output_file} exceeds signal length. Skipping.")
+            continue
         signal_segment = signal[start_sample:end_sample]
         with open(output_file, "wb") as f:
             sf.write(f, signal_segment, samplerate=fs)
 
 
-def wav_to_csv(name: str) -> str:
+def csv_to_pid_wav(name: str) -> str:
     """Replace .wav with .csv"""
-    return ".".join(name.split(".")[:-1]) + ".csv"
+    return ".".join(name.split(".")[:-1]) + ".wav"
+
+
+def csv_to_device_wav(name: str) -> str:
+    """Replace PXXX.csv with .wav"""
+    return ".".join(name.split(".")[:-2]) + ".wav"
 
 
 def segment_signal_dir(
     signal_dir: Path | str,
     segment_info_dir: Path | str,
     output_dir: Path | str,
-    filter: str = "*",
-    translate: Optional[Callable[[str], str]] = None,
+    file_pattern: str = "*",
+    translate_id: Optional[str] = None,
 ) -> None:
     """Extract speech segments from all signals in a directory"""
     logging.info("Segmenting signals...")
-    if translate is None:
-        translate = wav_to_csv
+    if translate_id == "pid_wav":
+        translate_fn = csv_to_pid_wav
+    elif translate_id == "device_wav":
+        translate_fn = csv_to_device_wav
 
     output_dir = Path(output_dir)
     if not output_dir.exists():
         output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Find all the wav files to process...
-    wav_files = list(Path(signal_dir).glob(filter))
-    # ... and find their corresponding csv segmentation files
-    csv_files = [
-        Path(segment_info_dir) / translate(str(wav_file.name)) for wav_file in wav_files
+    # Find all the csv segmentation files to process...
+    csv_files = list(Path(segment_info_dir).glob(file_pattern))
+    # ... and find their corresponding wav files
+    wav_files = [
+        Path(signal_dir) / translate_fn(str(csv_file.name)) for csv_file in csv_files
     ]
 
     n_files = len(wav_files)
