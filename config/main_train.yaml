@@ -4,11 +4,8 @@
 defaults:
   - .@paths: paths
   - .@shared: shared
-  - .@prepare: prepare
-  - .@validate: validate
-  - .@enhance: enhance
-  - .@evaluate: evaluate
-  - .@report: report
+  - .@prepare_ref: prepare_ref
+  - .@prepare_train: prepare_train
   - _self_
 
 # Setting up paths for outputs of the experiments
@@ -24,13 +21,7 @@ hydra:
 # If you wish to skip a step, set its value to null or true as below.
 # This can be also done from command-line when running the script, e.g.
 # python run.py prepare_data.run=false
-prepare:
+prepare_ref:
   run: true
-validate:
-  run: false
-enhance:
-  run: false
-evaluate:
-  run: false
-report:
-  run: false
+prepare_train:
+  run: true

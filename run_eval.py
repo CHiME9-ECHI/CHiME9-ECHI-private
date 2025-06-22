@@ -13,12 +13,12 @@ from scripts.report import report
 from scripts.validate import validate
 
 
-@hydra.main(version_base=None, config_path="config", config_name="main")
+@hydra.main(version_base=None, config_path="config", config_name="main_eval")
 def main(cfg):
     logging.info(f"Hydra config:\n{OmegaConf.to_yaml(cfg, resolve=True)}")
 
-    if cfg.prepare.run:
-        prepare(cfg.prepare)
+    if cfg.prepare_ref.run:
+        prepare(cfg.prepare_ref)
 
     if cfg.enhance.run:
         enhance(cfg.enhance)

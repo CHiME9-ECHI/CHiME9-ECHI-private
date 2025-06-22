@@ -1,8 +1,10 @@
-ref_signal_dir: ${..paths.ref_signal_dir}
+input_signal_dir: ${..paths.signal_dir}
 segment_info_dir: ${..paths.segment_info_dir}
 
-ref_segment_dir: ${..paths.ref_segment_dir}
+output_segment_dir: ${..paths.device_segment_dir}
 
 dataset: ${..shared.dataset}
 devices: [ha, aria]
 sessions_file: ${..paths.sessions_file}
+
+translate_id: device_wav

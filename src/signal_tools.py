@@ -4,7 +4,7 @@ import csv
 import itertools
 import logging
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Optional
 
 import soundfile as sf
 from tqdm import tqdm
@@ -86,9 +86,14 @@ def segment_signal(wav_file: Path, csv_file: Path, output_dir: Path) -> None:
             sf.write(f, signal_segment, samplerate=fs)
 
 
-def csv_to_wav(name: str) -> str:
+def csv_to_pid_wav(name: str) -> str:
     """Replace .wav with .csv"""
     return ".".join(name.split(".")[:-1]) + ".wav"
+
+
+def csv_to_device_wav(name: str) -> str:
+    """Replace PXXX.csv with .wav"""
+    return ".".join(name.split(".")[:-2]) + ".wav"
 
 
 def segment_signal_dir(
@@ -96,12 +101,14 @@ def segment_signal_dir(
     segment_info_dir: Path | str,
     output_dir: Path | str,
     file_pattern: str = "*",
-    translate: Optional[Callable[[str], str]] = None,
+    translate_id: Optional[str] = None,
 ) -> None:
     """Extract speech segments from all signals in a directory"""
     logging.info("Segmenting signals...")
-    if translate is None:
-        translate = csv_to_wav
+    if translate_id == "pid_wav":
+        translate_fn = csv_to_pid_wav
+    elif translate_id == "device_wav":
+        translate_fn = csv_to_device_wav
 
     output_dir = Path(output_dir)
     if not output_dir.exists():
@@ -111,7 +118,7 @@ def segment_signal_dir(
     csv_files = list(Path(segment_info_dir).glob(file_pattern))
     # ... and find their corresponding wav files
     wav_files = [
-        Path(signal_dir) / translate(str(csv_file.name)) for csv_file in csv_files
+        Path(signal_dir) / translate_fn(str(csv_file.name)) for csv_file in csv_files
     ]
 
     n_files = len(wav_files)
