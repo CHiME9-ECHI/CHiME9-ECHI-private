@@ -30,8 +30,8 @@ ref_segment_dir: ${paths.scratch}/ref_segments/{dataset}/{device}/{segment_type}
 
 # Directories and paths where outputs are produced
 segment_dir: ${..paths.scratch}/${..shared.exp}/segments/{device}/{segment_type}
-results_file: ${..paths.scratch}/${..shared.exp}/results/results.${..shared.dataset}.{device}.json
-report_file: ${..paths.scratch}/${..shared.exp}/reports/report.${..shared.dataset}.{device}.{session}.{pid}.json
+results_file: ${..paths.scratch}/${..shared.exp}/results/results.${..shared.dataset}.{device}.{segment_type}.json
+report_file: ${..paths.scratch}/${..shared.exp}/reports/report.${..shared.dataset}.{device}.{segment_type}.{session}.{pid}.json
 
 # Names for the enhanced signals
 enhanced_signal: ${paths.enhanced_dir}/${paths.signal_id}.wav

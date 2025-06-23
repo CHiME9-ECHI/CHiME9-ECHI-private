@@ -142,7 +142,7 @@ def evaluate(cfg):
     validate_batch_param(batch)
 
     for device in cfg.devices:
-        results_file = cfg.results_file.format(device=device)
+        results_file = cfg.results_file.format(device=device, segment_type="individual")
         results_file = add_batch_to_results_file_name(results_file, batch)
 
         # Create directory if it does not exist
