@@ -49,7 +49,7 @@ def setup(cfg):
 
 @hydra.main(version_base=None, config_path="../config", config_name="main")
 def main(cfg: DictConfig) -> None:
-    setup(cfg.prepare)
+    setup(cfg.setup)
 
 
 if __name__ == "__main__":
