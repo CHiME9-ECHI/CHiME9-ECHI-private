@@ -6,6 +6,7 @@ defaults:
   - .@shared: shared
   - .@setup: setup
   - .@validate: validate
+  - .@prepare: prepare
   - .@enhance: enhance
   - .@evaluate: evaluate
   - .@report: report
@@ -26,9 +27,11 @@ hydra:
 # python run.py setup.run=false
 setup:
   run: true
+enhance:
+  run: true
 validate:
   run: true
-enhance:
+prepare:
   run: true
 evaluate:
   run: true

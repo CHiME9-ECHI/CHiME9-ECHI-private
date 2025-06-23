@@ -63,6 +63,7 @@ This is equivalent to running the following steps
 python -m scripts.setup
 python -m scripts.enhance
 python -m scripts.validate
+python -m scripts.prepare
 python -m scripts.evaluate
 python -m scripts.report
 ```
@@ -100,6 +101,7 @@ general settings).
 - `setup.yaml`: Configuration for the data setup stage (`scripts/setup.py`).
 - `enhance.yaml`: Configuration for the enhancement stage (`scripts/enhance.py`).
 - `validate.yaml`: Configuration for the validate stage (`scripts/validate.py`).
+- `prepare.yaml`: Configuration for the preparationstage (`scripts/prepare.py`).
 - `evaluate.yaml`: Configuration for the evaluation stage (`scripts/evaluate.py`).
 - `report.yaml`: Configuration for the reporting stage (`scripts/report.py`).
 - `metrics.yaml`: Configuration for the metrics used in evaluation.
