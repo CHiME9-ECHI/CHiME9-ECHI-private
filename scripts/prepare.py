@@ -17,11 +17,12 @@ def prepare(cfg):
     )
 
     for session, device, pid in tqdm(session_tuples):
-        # for device in cfg.devices:
-        output_dir = cfg.ref_segment_dir.format(dataset=cfg.dataset, device=device)
-
-        logging.info(f"Segmenting {device} reference signals into {output_dir}")
-
+        # Segment the reference signal for this PID
+        output_dir = (
+            cfg.ref_segment_dir.format(dataset=cfg.dataset, device=device)
+            + "/individual"
+        )
+        logging.info(f"Segmenting {device}, {pid} reference signals into {output_dir}")
         wav_file = cfg.ref_signal_file.format(
             dataset=cfg.dataset, session=session, device=device, pid=pid
         )
@@ -29,6 +30,22 @@ def prepare(cfg):
             dataset=cfg.dataset, session=session, device=device, pid=pid
         )
         segment_signal(wav_file, csv_file, output_dir)
+
+        # Segment the summed reference signal using this PIDs segment info
+        output_dir = (
+            cfg.ref_segment_dir.format(dataset=cfg.dataset, device=device) + "/summed"
+        )
+        logging.info(f"Segmenting {device}, {pid} reference signals into {output_dir}")
+
+        pids = [p for s, d, p in session_tuples if s == session and d == device]
+        wav_files = [
+            cfg.ref_signal_file.format(
+                dataset=cfg.dataset, session=session, device=device, pid=pid
+            )
+            for pid in pids
+        ]
+
+        segment_signal(wav_files, csv_file, output_dir)
 
 
 @hydra.main(version_base=None, config_path="../config", config_name="main")

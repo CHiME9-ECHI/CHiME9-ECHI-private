@@ -6,6 +6,7 @@ import logging
 from pathlib import Path
 from typing import Callable, Optional
 
+import numpy as np
 import soundfile as sf
 from tqdm import tqdm
 
@@ -31,6 +32,28 @@ def get_session_tuples(session_file, devices, datasets=None):
     return session_device_pid_tuples
 
 
+def read_wav_files_and_sum(wav_files):
+    """Read a list of wav files and return their sum."""
+
+    sum_signal = None
+    for file in wav_files:
+        with open(file, "rb") as f:
+            signal, fs = sf.read(f)
+            if sum_signal is not None:
+                if len(signal) != len(sum_signal):
+                    # pad the short with zeros
+                    if len(signal) < len(sum_signal):
+                        signal = np.pad(signal, (0, len(sum_signal) - len(signal)))
+                    else:
+                        sum_signal = np.pad(
+                            sum_signal, (0, len(signal) - len(sum_signal))
+                        )
+                sum_signal += signal
+            else:
+                sum_signal = signal
+    return sum_signal, fs
+
+
 def wav_file_name(
     output_dir: Path, stem: str, index: int, start_sample: int, end_sample: int
 ) -> Path:
@@ -38,7 +61,9 @@ def wav_file_name(
     return Path(output_dir) / f"{stem}.{index:03g}.{start_sample}_{end_sample}.wav"
 
 
-def segment_signal(wav_file: Path, csv_file: Path, output_dir: Path) -> None:
+def segment_signal(
+    wav_file: Path | list[Path], csv_file: Path, output_dir: Path
+) -> None:
     """Extract speech segments from a signal"""
     logging.debug(f"Segmenting {wav_file} {csv_file}")
     if not Path(output_dir).exists():
@@ -64,8 +89,11 @@ def segment_signal(wav_file: Path, csv_file: Path, output_dir: Path) -> None:
         logging.debug(f"All segments already exist in {output_dir}")
         return
 
-    with open(wav_file, "rb") as f:
-        signal, fs = sf.read(f)
+    if isinstance(wav_file, list):
+        signal, fs = read_wav_files_and_sum(wav_file)
+    else:
+        with open(wav_file, "rb") as f:
+            signal, fs = sf.read(f)
 
     logging.debug(f"Will generate {len(segments)} segments from {wav_file}")
     for segment in segments:
