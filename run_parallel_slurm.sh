@@ -38,7 +38,7 @@ python scripts/enhance.py
 echo "Run validation stage..."
 python scripts/validate.py
 
-cho "Run preparation stage..."
+echo "Run preparation stage..."
 python scripts/prepare.py
 
 echo "Multirun evaluate stage..."
