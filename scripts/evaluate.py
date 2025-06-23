@@ -152,12 +152,14 @@ def evaluate(cfg):
             cfg.sessions_file, [device], datasets=[cfg.dataset]
         )
 
-        segment_dir = cfg.segment_dir.format(device=device)
+        segment_dir = cfg.segment_dir.format(device=device, segment_type="individual")
         logging.info(f"Segment {device} signals into {segment_dir}")
         segment_signal_dir(signal_dir, cfg.csv_dir, segment_dir, filter=f"*{device}*P*")
 
         logging.info(f"Evaluating {device} segments")
-        ref_segment_dir = cfg.ref_segment_dir.format(dataset=cfg.dataset, device=device)
+        ref_segment_dir = cfg.ref_segment_dir.format(
+            dataset=cfg.dataset, device=device, segment_type="individual"
+        )
         evaluate_device(
             segment_dir,
             ref_segment_dir,

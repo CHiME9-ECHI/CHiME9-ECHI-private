@@ -18,9 +18,8 @@ def prepare(cfg):
 
     for session, device, pid in tqdm(session_tuples):
         # Segment the reference signal for this PID
-        output_dir = (
-            cfg.ref_segment_dir.format(dataset=cfg.dataset, device=device)
-            + "/individual"
+        output_dir = cfg.ref_segment_dir.format(
+            dataset=cfg.dataset, device=device, segment_type="individual"
         )
         logging.info(f"Segmenting {device}, {pid} reference signals into {output_dir}")
         wav_file = cfg.ref_signal_file.format(
@@ -32,8 +31,8 @@ def prepare(cfg):
         segment_signal(wav_file, csv_file, output_dir)
 
         # Segment the summed reference signal using this PIDs segment info
-        output_dir = (
-            cfg.ref_segment_dir.format(dataset=cfg.dataset, device=device) + "/summed"
+        output_dir = cfg.ref_segment_dir.format(
+            dataset=cfg.dataset, device=device, segment_type="summed"
         )
         logging.info(f"Segmenting {device}, {pid} reference signals into {output_dir}")
 
