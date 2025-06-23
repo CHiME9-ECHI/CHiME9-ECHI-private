@@ -120,6 +120,44 @@ def wav_to_csv(name: str) -> str:
     return ".".join(name.split(".")[:-1]) + ".csv"
 
 
+def segment_all_signals(
+    signal_template, output_dir_template, segment_info_file, dataset, session_tuples
+):
+    for session, device, pid in tqdm(session_tuples):
+        # Segment the reference signal for this PID
+        output_dir = output_dir_template.format(
+            dataset=dataset, device=device, segment_type="individual"
+        )
+
+        logging.info(f"Segmenting {device}, {pid} reference signals into {output_dir}")
+        wav_file = signal_template.format(
+            dataset=dataset, session=session, device=device, pid=pid
+        )
+        csv_file = segment_info_file.format(
+            dataset=dataset, session=session, device=device, pid=pid
+        )
+        segment_signal(wav_file, csv_file, output_dir)
+
+        # Segment the summed reference signal using this PIDs segment info
+        output_dir = output_dir_template.format(
+            dataset=dataset, device=device, segment_type="summed"
+        )
+        logging.info(f"Segmenting {device}, {pid} reference signals into {output_dir}")
+
+        pids = [p for s, d, p in session_tuples if s == session and d == device]
+        wav_files = [
+            signal_template.format(
+                dataset=dataset, session=session, device=device, pid=pid
+            )
+            for pid in pids
+        ]
+
+        segment_signal(wav_files, csv_file, output_dir)
+
+
+### Function below is OBSOLETE and marked for removal before release.
+
+
 def segment_signal_dir(
     signal_dir: Path | str,
     segment_info_dir: Path | str,
