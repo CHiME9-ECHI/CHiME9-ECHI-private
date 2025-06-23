@@ -29,23 +29,23 @@ fi
 # Usage: ./run_parallel_slurm.sh [N_BATCHES]
 N_BATCHES="${1:-40}"
 
-echo "Run prepare stage..."
+echo "Run setup stage..."
 python run.py \
-    prepare.run=true \
+    setup.run=true \
     enhance.run=false \
     evaluate.run=false \
     report.run=false
 
 echo "Run enhance stage..."
 python run.py \
-    prepare.run=false \
+    setup.run=false \
     enhance.run=true \
     evaluate.run=false \
     report.run=false
 
 echo "Multirun evaluate stage..."
 python run.py \
-    prepare.run=false \
+    setup.run=false \
     enhance.run=false \
     evaluate.run=true \
     report.run=false \
@@ -56,7 +56,7 @@ python run.py \
 
 echo "Run reporting stage..."
 python run.py \
-    prepare.run=false \
+    setup.run=false \
     enhance.run=false \
     evaluate.run=false \
     report.run=true

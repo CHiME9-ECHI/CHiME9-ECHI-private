@@ -1,4 +1,4 @@
-"""Prepare ECHI data"""
+"""Setup the ECHI data for use in experiments"""
 
 import logging
 
@@ -9,7 +9,7 @@ from tqdm import tqdm
 from signal_tools import get_session_tuples, segment_signal
 
 
-def prepare(cfg):
+def setup(cfg):
     logging.info("Preparing the ECHI dataset")
 
     session_tuples = get_session_tuples(
@@ -49,7 +49,7 @@ def prepare(cfg):
 
 @hydra.main(version_base=None, config_path="../config", config_name="main")
 def main(cfg: DictConfig) -> None:
-    prepare(cfg.prepare)
+    setup(cfg.prepare)
 
 
 if __name__ == "__main__":

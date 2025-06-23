@@ -60,7 +60,7 @@ python run.py
 This is equivalent to running the following steps
 
 ```bash
-python -m scripts.prepare
+python -m scripts.setup
 python -m scripts.enhance
 python -m scripts.validate
 python -m scripts.evaluate
@@ -97,7 +97,7 @@ The main configuration files are located in the `config` directory:
 - `main.yaml`: Main configuration, imports other specific configurations.
 - `shared.yaml`: Shared parameters used across different scripts (e.g., dataset paths,
 general settings).
-- `prepare.yaml`: Configuration for the data preparation stage (`scripts/prepare.py`).
+- `setup.yaml`: Configuration for the data setup stage (`scripts/setup.py`).
 - `enhance.yaml`: Configuration for the enhancement stage (`scripts/enhance.py`).
 - `validate.yaml`: Configuration for the validate stage (`scripts/validate.py`).
 - `evaluate.yaml`: Configuration for the evaluation stage (`scripts/evaluate.py`).

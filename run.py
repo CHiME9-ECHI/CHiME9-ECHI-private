@@ -8,8 +8,8 @@ from omegaconf import OmegaConf
 
 from scripts.dummy_enhance import dummy_enhance as enhance
 from scripts.evaluate import evaluate
-from scripts.prepare import prepare
 from scripts.report import report
+from scripts.setup import setup
 from scripts.validate import validate
 
 
@@ -17,8 +17,8 @@ from scripts.validate import validate
 def main(cfg):
     logging.info(f"Hydra config:\n{OmegaConf.to_yaml(cfg, resolve=True)}")
 
-    if cfg.prepare.run:
-        prepare(cfg.prepare)
+    if cfg.setup.run:
+        setup(cfg.setup)
 
     if cfg.enhance.run:
         enhance(cfg.enhance)
@@ -26,8 +26,9 @@ def main(cfg):
     if cfg.validate.run:
         status = validate(cfg.validate)
         if not status:
-        # The validate function logs detailed errors, so we just exit with a failure code.
-        raise SystemExit(1)
+            # The validate function logs detailed errors, so we just exit with a
+            # failure code.
+            raise SystemExit(1)
 
     if cfg.evaluate.run:
         evaluate(cfg.evaluate)
