@@ -1,5 +1,5 @@
-ref_signal_dir: ${..paths.ref_signal_dir}
-segment_info_dir: ${..paths.segment_info_dir}
+ref_signal_file: ${..paths.ref_signal_file}
+segment_info_file: ${..paths.segment_info_file}
 
 ref_segment_dir: ${..paths.ref_segment_dir}
 

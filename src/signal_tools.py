@@ -52,7 +52,7 @@ def segment_signal(wav_file: Path, csv_file: Path, output_dir: Path) -> None:
     for segment in segments:
         expected_files = wav_file_name(
             output_dir,
-            csv_file.stem,
+            Path(csv_file).stem,
             int(segment["index"]),
             int(segment["start"]),
             int(segment["end"]),
@@ -67,13 +67,14 @@ def segment_signal(wav_file: Path, csv_file: Path, output_dir: Path) -> None:
     with open(wav_file, "rb") as f:
         signal, fs = sf.read(f)
 
+    logging.debug(f"Will generate {len(segments)} segments from {wav_file}")
     for segment in segments:
         index = int(segment["index"])
         start_sample = int(segment["start"])
         end_sample = int(segment["end"])
 
         output_file = wav_file_name(
-            output_dir, csv_file.stem, index, start_sample, end_sample
+            output_dir, Path(csv_file).stem, index, start_sample, end_sample
         )
         if output_file.exists():
             logging.debug(f"Segment {output_file} already exists, skipping")
