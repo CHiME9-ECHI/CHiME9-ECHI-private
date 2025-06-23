@@ -35,7 +35,7 @@ python scripts/setup.py
 echo "Run enhance stage..."
 python scripts/enhance.py
 
-cho "Run validation stage..."
+echo "Run validation stage..."
 python scripts/validate.py
 
 cho "Run preparation stage..."
