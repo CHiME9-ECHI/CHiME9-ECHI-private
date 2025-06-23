@@ -1,9 +1,11 @@
-"""Prepaer ECHI submission for evaluation"""
+"""Prepare ECHI submission for evaluation"""
 
 import logging
 
 import hydra
 from omegaconf import DictConfig
+
+from signal_tools import segment_signal_dir
 
 # from signal_tools import get_session_tuples
 
@@ -11,7 +13,7 @@ from omegaconf import DictConfig
 def prepare(cfg):
     logging.info("Running preparation for evaluation")
     # TODO: Complete this
-    # signal_dir = cfg.enhanced_dir
+    signal_dir = cfg.enhanced_dir
 
     for device in cfg.devices:
         # session_device_pid_tuples = get_session_tuples(
@@ -20,7 +22,7 @@ def prepare(cfg):
 
         segment_dir = cfg.segment_dir.format(device=device, segment_type="individual")
         logging.info(f"Segment {device} signals into {segment_dir}")
-        # segment_signal_dir(signal_dir, cfg.csv_dir, segment_dir, filter=f"*{device}*P*")
+        segment_signal_dir(signal_dir, cfg.csv_dir, segment_dir, filter=f"*{device}*P*")
 
 
 @hydra.main(version_base=None, config_path="../config", config_name="main")
