@@ -36,9 +36,11 @@ def read_wav_files_and_sum(wav_files):
     """Read a list of wav files and return their sum."""
 
     sum_signal = None
+    fs_set = set()
     for file in wav_files:
         with open(file, "rb") as f:
             signal, fs = sf.read(f)
+            fs_set.add(fs)
             if sum_signal is not None:
                 if len(signal) != len(sum_signal):
                     # pad the short with zeros
@@ -51,6 +53,10 @@ def read_wav_files_and_sum(wav_files):
                 sum_signal += signal
             else:
                 sum_signal = signal
+    if len(fs_set) != 1:
+        raise ValueError(f"Inconsistent sampling rates found: {fs_set}")
+    fs = fs_set.pop()
+
     return sum_signal, fs
 
 

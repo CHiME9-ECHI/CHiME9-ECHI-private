@@ -1,6 +1,7 @@
 """Prepare ECHI data"""
 
 import csv
+import itertools
 import json
 import logging
 import os
@@ -79,9 +80,9 @@ def report(cfg):
     sessions = set(session for session, _, _ in session_device_pid_tuples)
     pids = set(pid for _, _, pid in session_device_pid_tuples)
 
-    for device in cfg.devices:
+    for device, segment_type in itertools.product(cfg.devices, cfg.segment_types):
         logging.info(f"Processing device: {device}")
-        results_file = cfg.results_file.format(device=device, segment_type="individual")
+        results_file = cfg.results_file.format(device=device, segment_type=segment_type)
         results_file_base, ext = os.path.splitext(results_file)
         # The wildcard is used to accumulate over multiple batches
         results_files = glob(f"{results_file_base}*{ext}")
@@ -96,7 +97,7 @@ def report(cfg):
 
         stats = compute_stats(results)
         stats_file = cfg.report_file.format(
-            device=device, segment_type="individual", session="_", pid="_"
+            device=device, segment_type=segment_type, session="_", pid="_"
         )
         save_stats(stats, stats_file)
         save_results(results, stats_file, ext=".csv")
@@ -110,7 +111,7 @@ def report(cfg):
 
             session_stats = compute_stats(session_results)
             session_stats_file = cfg.report_file.format(
-                device=device, segment_type="individual", session=session, pid="_"
+                device=device, segment_type=segment_type, session=session, pid="_"
             )
             save_stats(session_stats, session_stats_file)
             save_results(session_results, session_stats_file, ext=".csv")
@@ -125,7 +126,7 @@ def report(cfg):
 
                 participant_stats = compute_stats(pid_session_results)
                 participant_stats_file = cfg.report_file.format(
-                    device=device, segment_type="individual", session=session, pid=pid
+                    device=device, segment_type=segment_type, session=session, pid=pid
                 )
                 save_stats(participant_stats, participant_stats_file)
                 save_results(pid_session_results, participant_stats_file, ext=".csv")
