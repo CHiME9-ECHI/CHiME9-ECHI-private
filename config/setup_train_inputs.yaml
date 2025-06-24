@@ -4,7 +4,6 @@ segment_sample_rate: ${..shared.sample_rate}
 
 output_segment_dir: ${..paths.train_input_dir}
 
-# dataset: ${..shared.dataset}
 dataset: [train, dev]
 devices: [ha, aria]
 sessions_file: ${..paths.sessions_file}

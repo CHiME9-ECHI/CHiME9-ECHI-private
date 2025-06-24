@@ -18,6 +18,7 @@ def get_session_tuples(session_file, devices, datasets):
         datasets = [datasets]
 
     sessions = []
+    print(datasets)
     for ds in datasets:
         with open(session_file.format(dataset=ds), "r") as f:
             sessions += list(csv.DictReader(f))

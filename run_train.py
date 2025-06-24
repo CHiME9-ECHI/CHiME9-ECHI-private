@@ -6,7 +6,7 @@ import logging
 import hydra
 from omegaconf import OmegaConf
 
-from scripts.prepare import prepare
+from scripts.setup import setup
 from scripts.train import run
 
 
@@ -14,11 +14,11 @@ from scripts.train import run
 def main(cfg):
     logging.info(f"Hydra config:\n{OmegaConf.to_yaml(cfg, resolve=True)}")
 
-    if cfg.prepare_ref.run:
-        prepare(cfg.prepare_ref)
+    if cfg.setup_train_targets.run:
+        setup(cfg.setup_train_targets)
 
-    if cfg.prepare_train.run:
-        prepare(cfg.prepare_train)
+    if cfg.setup_train_inputs.run:
+        setup(cfg.setup_train_inputs)
 
     if cfg.train.run:
         run(cfg.paths, cfg.model, cfg.train, True)
