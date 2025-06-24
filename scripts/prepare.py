@@ -27,6 +27,7 @@ def prepare(cfg):
                 segment_info_dir=segment_info_dir,
                 output_dir=output_dir,
                 segment_sample_rate=cfg.segment_sample_rate,
+                segment_collar=cfg.segment_collar,
                 file_pattern=f"*{device}*P*",
                 translate_id=cfg.translate_id,
             )

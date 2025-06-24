@@ -40,7 +40,11 @@ def wav_file_name(
 
 
 def segment_signal(
-    wav_file: Path, csv_file: Path, output_dir: Path, seg_sample_rate
+    wav_file: Path,
+    csv_file: Path,
+    output_dir: Path,
+    seg_sample_rate: int,
+    collar_ms: int,
 ) -> None:
     """Extract speech segments from a signal"""
     logging.debug(f"Segmenting {wav_file} {csv_file}")
@@ -71,11 +75,12 @@ def segment_signal(
         signal, fs = sf.read(f)
 
     sample_scalar = fs / seg_sample_rate
+    collar_samples = fs * collar_ms
 
     for segment in segments:
         index = int(segment["index"])
-        start_sample = int(int(segment["start"]) * sample_scalar)
-        end_sample = int(int(segment["end"]) * sample_scalar)
+        start_sample = int(int(segment["start"]) * sample_scalar) - collar_samples
+        end_sample = int(int(segment["end"]) * sample_scalar) + collar_samples
 
         output_file = wav_file_name(
             output_dir, csv_file.stem, index, start_sample, end_sample
@@ -106,6 +111,7 @@ def segment_signal_dir(
     segment_info_dir: Path | str,
     output_dir: Path | str,
     segment_sample_rate: int,
+    segment_collar: int,
     file_pattern: str = "*",
     translate_id: Optional[str] = None,
 ) -> None:
@@ -135,4 +141,6 @@ def segment_signal_dir(
         if not wav_file.exists():
             logging.error(f"Missing wav file: {wav_file}")
             continue
-        segment_signal(wav_file, csv_file, Path(output_dir), segment_sample_rate)
+        segment_signal(
+            wav_file, csv_file, Path(output_dir), segment_sample_rate, segment_collar
+        )

@@ -29,7 +29,10 @@ segment_info_file: ${paths.segment_info_dir}/${paths.signal_id}.csv
 
 # Path to the reference segment directory
 ref_segment_dir: ${paths.scratch}/ref_segments/{dataset}/{device}
-device_segment_dir: ${paths.scratch}/device_segments/{dataset}/{device}
+
+# Path to the training segment directory
+train_input_dir: ${paths.scratch}/train_segments/{dataset}/{device}
+train_target_dir: ${paths.scratch}/train_segments/{dataset}/{device}_ref
 
 # Directories and paths where outputs are produced
 segment_dir: ${..paths.scratch}/${..shared.exp}/segments/{device}
