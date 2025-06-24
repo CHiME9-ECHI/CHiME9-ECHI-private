@@ -135,20 +135,25 @@ def segment_all_signals(
             dataset=dataset, device=device, segment_type="individual"
         )
 
-        logging.info(f"Segmenting {device}, {pid} reference signals into {output_dir}")
+        logging.debug(f"Segmenting {device}, {pid} reference signals into {output_dir}")
         wav_file = signal_template.format(
             dataset=dataset, session=session, device=device, pid=pid
         )
         csv_file = segment_info_file.format(
             dataset=dataset, session=session, device=device, pid=pid
         )
+
+        if not Path(csv_file).exists():
+            logging.warning(f"WARNING: csv file not found at {csv_file}")
+            continue
+
         segment_signal(wav_file, csv_file, output_dir)
 
         # Segment the summed reference signal using this PIDs segment info
         output_dir = output_dir_template.format(
             dataset=dataset, device=device, segment_type="summed"
         )
-        logging.info(f"Segmenting {device}, {pid} reference signals into {output_dir}")
+        logging.debug(f"Segmenting {device}, {pid} reference signals into {output_dir}")
 
         pids = [p for s, d, p in session_tuples if s == session and d == device]
         wav_files = [
