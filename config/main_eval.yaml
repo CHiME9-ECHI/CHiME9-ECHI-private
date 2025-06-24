@@ -4,8 +4,9 @@
 defaults:
   - .@paths: paths
   - .@shared: shared
-  - .@prepare_ref: prepare_ref
+  - .@setup: setup
   - .@validate: validate
+  - .@prepare_ref: prepare_ref
   - .@enhance: enhance
   - .@evaluate: evaluate
   - .@report: report
@@ -23,14 +24,16 @@ hydra:
 
 # If you wish to skip a step, set its value to null or true as below.
 # This can be also done from command-line when running the script, e.g.
-# python run.py prepare_data.run=false
-prepare_ref:
+# python run.py setup.run=false
+setup:
+  run: true
+enhance:
   run: true
 validate:
-  run: false
-enhance:
-  run: false
+  run: true
+prepare:
+  run: true
 evaluate:
-  run: false
+  run: true
 report:
-  run: false
+  run: true

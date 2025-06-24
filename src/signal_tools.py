@@ -4,8 +4,8 @@ import csv
 import itertools
 import logging
 from pathlib import Path
-from typing import Optional
 
+import numpy as np
 import soundfile as sf
 from tqdm import tqdm
 
@@ -31,6 +31,34 @@ def get_session_tuples(session_file, devices, datasets=None):
     return session_device_pid_tuples
 
 
+def read_wav_files_and_sum(wav_files):
+    """Read a list of wav files and return their sum."""
+
+    sum_signal = None
+    fs_set = set()
+    for file in wav_files:
+        with open(file, "rb") as f:
+            signal, fs = sf.read(f)
+            fs_set.add(fs)
+            if sum_signal is not None:
+                if len(signal) != len(sum_signal):
+                    # pad the short with zeros
+                    if len(signal) < len(sum_signal):
+                        signal = np.pad(signal, (0, len(sum_signal) - len(signal)))
+                    else:
+                        sum_signal = np.pad(
+                            sum_signal, (0, len(signal) - len(sum_signal))
+                        )
+                sum_signal += signal
+            else:
+                sum_signal = signal
+    if len(fs_set) != 1:
+        raise ValueError(f"Inconsistent sampling rates found: {fs_set}")
+    fs = fs_set.pop()
+
+    return sum_signal, fs
+
+
 def wav_file_name(
     output_dir: Path, stem: str, index: int, start_sample: int, end_sample: int
 ) -> Path:
@@ -40,11 +68,7 @@ def wav_file_name(
 
 
 def segment_signal(
-    wav_file: Path,
-    csv_file: Path,
-    output_dir: Path,
-    seg_sample_rate: int,
-    collar_ms: int,
+    wav_file: Path | list[Path], csv_file: Path, output_dir: Path
 ) -> None:
     """Extract speech segments from a signal"""
     logging.debug(f"Segmenting {wav_file} {csv_file}")
@@ -59,7 +83,7 @@ def segment_signal(
     for segment in segments:
         expected_files = wav_file_name(
             output_dir,
-            csv_file.stem,
+            Path(csv_file).stem,
             int(segment["index"]),
             int(segment["start"]),
             int(segment["end"]),
@@ -71,11 +95,17 @@ def segment_signal(
         logging.debug(f"All segments already exist in {output_dir}")
         return
 
-    with open(wav_file, "rb") as f:
-        signal, fs = sf.read(f)
+    if isinstance(wav_file, list):
+        signal, fs = read_wav_files_and_sum(wav_file)
+    else:
+        with open(wav_file, "rb") as f:
+            signal, fs = sf.read(f)
 
-    sample_scalar = fs / seg_sample_rate
-    collar_samples = fs * collar_ms
+    logging.debug(f"Will generate {len(segments)} segments from {wav_file}")
+    # sample_scalar = fs / seg_sample_rate
+    # collar_samples = fs * collar_ms
+    sample_scalar = 1
+    collar_samples = 0
 
     for segment in segments:
         index = int(segment["index"])
@@ -83,7 +113,7 @@ def segment_signal(
         end_sample = int(int(segment["end"]) * sample_scalar) + collar_samples
 
         output_file = wav_file_name(
-            output_dir, csv_file.stem, index, start_sample, end_sample
+            output_dir, Path(csv_file).stem, index, start_sample, end_sample
         )
         if output_file.exists():
             logging.debug(f"Segment {output_file} already exists, skipping")
@@ -98,49 +128,82 @@ def segment_signal(
 
 def csv_to_pid_wav(name: str) -> str:
     """Replace .wav with .csv"""
-    return ".".join(name.split(".")[:-1]) + ".wav"
+    return ".".join(name.split(".")[:-1]) + ".csv"
 
 
-def csv_to_device_wav(name: str) -> str:
-    """Replace PXXX.csv with .wav"""
-    return ".".join(name.split(".")[:-2]) + ".wav"
-
-
-def segment_signal_dir(
-    signal_dir: Path | str,
-    segment_info_dir: Path | str,
-    output_dir: Path | str,
-    segment_sample_rate: int,
-    segment_collar: int,
-    file_pattern: str = "*",
-    translate_id: Optional[str] = None,
-) -> None:
-    """Extract speech segments from all signals in a directory"""
-    logging.info("Segmenting signals...")
-    if translate_id == "pid_wav":
-        translate_fn = csv_to_pid_wav
-    elif translate_id == "device_wav":
-        translate_fn = csv_to_device_wav
-
-    output_dir = Path(output_dir)
-    if not output_dir.exists():
-        output_dir.mkdir(parents=True, exist_ok=True)
-
-    # Find all the csv segmentation files to process...
-    csv_files = list(Path(segment_info_dir).glob(file_pattern))
-    # ... and find their corresponding wav files
-    wav_files = [
-        Path(signal_dir) / translate_fn(str(csv_file.name)) for csv_file in csv_files
-    ]
-
-    n_files = len(wav_files)
-
-    for wav_file, csv_file in tqdm(
-        zip(wav_files, csv_files), desc="Segmenting...", total=n_files
-    ):
-        if not wav_file.exists():
-            logging.error(f"Missing wav file: {wav_file}")
-            continue
-        segment_signal(
-            wav_file, csv_file, Path(output_dir), segment_sample_rate, segment_collar
+def segment_all_signals(
+    signal_template, output_dir_template, segment_info_file, dataset, session_tuples
+):
+    for session, device, pid in tqdm(session_tuples):
+        # Segment the reference signal for this PID
+        output_dir = output_dir_template.format(
+            dataset=dataset, device=device, segment_type="individual"
         )
+
+        logging.info(f"Segmenting {device}, {pid} reference signals into {output_dir}")
+        wav_file = signal_template.format(
+            dataset=dataset, session=session, device=device, pid=pid
+        )
+        csv_file = segment_info_file.format(
+            dataset=dataset, session=session, device=device, pid=pid
+        )
+        segment_signal(wav_file, csv_file, output_dir)
+
+        # Segment the summed reference signal using this PIDs segment info
+        output_dir = output_dir_template.format(
+            dataset=dataset, device=device, segment_type="summed"
+        )
+        logging.info(f"Segmenting {device}, {pid} reference signals into {output_dir}")
+
+        pids = [p for s, d, p in session_tuples if s == session and d == device]
+        wav_files = [
+            signal_template.format(
+                dataset=dataset, session=session, device=device, pid=pid
+            )
+            for pid in pids
+        ]
+
+        segment_signal(wav_files, csv_file, output_dir)
+
+
+### Function below is OBSOLETE and marked for removal before release.
+
+
+# def segment_signal_dir(
+#     signal_dir: Path | str,
+#     segment_info_dir: Path | str,
+#     output_dir: Path | str,
+#     segment_sample_rate: int,
+#     segment_collar: int,
+#     file_pattern: str = "*",
+#     translate_id: Optional[str] = None,
+# ) -> None:
+#     """Extract speech segments from all signals in a directory"""
+#     logging.info("Segmenting signals...")
+#     if translate_id == "pid_wav":
+#         translate_fn = csv_to_pid_wav
+#     elif translate_id == "device_wav":
+#         translate_fn = csv_to_device_wav
+
+#     output_dir = Path(output_dir)
+#     if not output_dir.exists():
+#         output_dir.mkdir(parents=True, exist_ok=True)
+
+#     # Find all the csv segmentation files to process...
+#     csv_files = list(Path(segment_info_dir).glob(file_pattern))
+#     # ... and find their corresponding wav files
+#     wav_files = [
+#         Path(signal_dir) / translate_fn(str(csv_file.name)) for csv_file in csv_files
+#     ]
+
+#     n_files = len(wav_files)
+
+#     for wav_file, csv_file in tqdm(
+#         zip(wav_files, csv_files), desc="Segmenting...", total=n_files
+#     ):
+#         if not wav_file.exists():
+#             logging.error(f"Missing wav file: {wav_file}")
+#             continue
+#         segment_signal(
+#             wav_file, csv_file, Path(output_dir), segment_sample_rate, segment_collar
+#         )
