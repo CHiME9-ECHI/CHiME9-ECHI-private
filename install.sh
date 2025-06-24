@@ -20,7 +20,7 @@ conda init bash >/dev/null 2>&1 || true
 if conda info --envs | grep -q "$ENV_NAME"; then
     echo "Conda environment '$ENV_NAME' already exists. Skipping creation."
 else
-    conda create --name "$ENV_NAME" python=3.10 -y
+    conda create --name "$ENV_NAME" python=3.11 -y
 fi
 
 # Activate the environment

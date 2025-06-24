@@ -4,6 +4,7 @@ channels:
   - pytorch
 dependencies:
   - cython
+  - espnet
   - hydra-core
   - hydra-submitit-launcher
   - librosa
@@ -21,4 +22,3 @@ dependencies:
       - auraloss
       - torch-stoi
       - sentencepiece
-      - espnet
