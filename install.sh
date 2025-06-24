@@ -20,15 +20,22 @@ conda init bash >/dev/null 2>&1 || true
 if conda info --envs | grep -q "$ENV_NAME"; then
     echo "Conda environment '$ENV_NAME' already exists. Skipping creation."
 else
-    conda create --name "$ENV_NAME" python=3.10 -y
+    conda create --name "$ENV_NAME" python=3.11 -y
 fi
 
 # Activate the environment
 conda activate "$ENV_NAME"
 
+# Add conda-forge as a high-priority channel (if not already present)
+if ! conda config --show channels | grep -q "conda-forge"; then
+    conda config --add channels conda-forge
+    conda config --add channels conda-forge
+    conda config --set channel_priority strict
+fi
+
 # Install dependencies
-if [[ -f environment.yaml ]]; then
-    conda env update --file environment.yaml
+if [[ -f requirements.txt ]]; then
+    conda install --file requirements.txt -y
 else
     echo "ERROR: requirements.txt not found"
     exit 1
