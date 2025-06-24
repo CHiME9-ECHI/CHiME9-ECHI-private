@@ -23,7 +23,7 @@ rainbow_signal_dir: ${paths.echi}/participant/{dataset}
 rainbow_signal_file: ${paths.rainbow_signal_dir}/{pid}.wav
 
 # chime9_echi metadata layout
-sessions_file: ${paths.echi}/metadata/sessions.${..shared.dataset}.csv
+sessions_file: ${paths.echi}/metadata/sessions.{dataset}.csv
 segment_info_dir: ${paths.echi}/metadata/ref/{dataset}
 segment_info_file: ${paths.segment_info_dir}/${paths.signal_id}.csv
 

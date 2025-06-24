@@ -12,14 +12,19 @@ from tqdm import tqdm
 POSITIONS = ["pos1", "pos2", "pos3", "pos4"]
 
 
-def get_session_tuples(session_file, devices, datasets=None):
+def get_session_tuples(session_file, devices, datasets):
     """Get session tuples for the specified datasets and devices."""
-    with open(session_file, "r") as f:
-        sessions = list(csv.DictReader(f))
+    if isinstance(datasets, str):
+        datasets = [datasets]
+
+    sessions = []
+    for ds in datasets:
+        with open(session_file.format(dataset=ds), "r") as f:
+            sessions += list(csv.DictReader(f))
 
     # Filter sessions for the specified datasets
     if datasets is not None:
-        sessions = [s for s in sessions if s["session"].startswith(tuple(datasets))]
+        sessions = [s for s in sessions if s["session"].startswith(tuple(datasets[0]))]
     session_device_pid_tuples = []
 
     for device, session in itertools.product(devices, sessions):
@@ -31,7 +36,7 @@ def get_session_tuples(session_file, devices, datasets=None):
     return session_device_pid_tuples
 
 
-def read_wav_files_and_sum(wav_files):
+def read_wav_files_and_sum(wav_files) -> tuple[np.ndarray, int]:
     """Read a list of wav files and return their sum."""
 
     sum_signal = None
@@ -54,6 +59,8 @@ def read_wav_files_and_sum(wav_files):
                 sum_signal = signal
     if len(fs_set) != 1:
         raise ValueError(f"Inconsistent sampling rates found: {fs_set}")
+    if sum_signal is None:
+        raise ValueError(f"No wav files found: {wav_files}")
     fs = fs_set.pop()
 
     return sum_signal, fs
@@ -68,7 +75,7 @@ def wav_file_name(
 
 
 def segment_signal(
-    wav_file: Path | list[Path], csv_file: Path, output_dir: Path
+    wav_file: Path | list[Path], csv_file: Path, output_dir: Path, seg_sample_rate: int
 ) -> None:
     """Extract speech segments from a signal"""
     logging.debug(f"Segmenting {wav_file} {csv_file}")
@@ -102,7 +109,7 @@ def segment_signal(
             signal, fs = sf.read(f)
 
     logging.debug(f"Will generate {len(segments)} segments from {wav_file}")
-    # sample_scalar = fs / seg_sample_rate
+    sample_scalar = fs / seg_sample_rate
     # collar_samples = fs * collar_ms
     sample_scalar = 1
     collar_samples = 0
@@ -132,9 +139,14 @@ def csv_to_pid_wav(name: str) -> str:
 
 
 def segment_all_signals(
-    signal_template, output_dir_template, segment_info_file, dataset, session_tuples
+    signal_template,
+    output_dir_template,
+    segment_info_file,
+    session_tuples,
+    seg_sample_rate,
 ):
     for session, device, pid in tqdm(session_tuples):
+        dataset = session.split("_")[0]
         # Segment the reference signal for this PID
         output_dir = output_dir_template.format(
             dataset=dataset, device=device, segment_type="individual"
@@ -147,7 +159,7 @@ def segment_all_signals(
         csv_file = segment_info_file.format(
             dataset=dataset, session=session, device=device, pid=pid
         )
-        segment_signal(wav_file, csv_file, output_dir)
+        segment_signal(wav_file, csv_file, output_dir, seg_sample_rate)
 
         # Segment the summed reference signal using this PIDs segment info
         output_dir = output_dir_template.format(
@@ -163,7 +175,7 @@ def segment_all_signals(
             for pid in pids
         ]
 
-        segment_signal(wav_files, csv_file, output_dir)
+        segment_signal(wav_files, csv_file, output_dir, seg_sample_rate)
 
 
 ### Function below is OBSOLETE and marked for removal before release.
