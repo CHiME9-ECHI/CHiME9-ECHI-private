@@ -25,7 +25,7 @@ def prepare(cfg):
         signal_template=cfg.enhanced_signal,
         output_dir_template=cfg.segment_dir,
         segment_info_file=cfg.segment_info_file,
-        dataset=cfg.dataset,
+        seg_sample_rate=cfg.segment_sample_rate,
         session_tuples=session_tuples,
     )
 
