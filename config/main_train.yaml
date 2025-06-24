@@ -4,8 +4,8 @@
 defaults:
   - .@paths: paths
   - .@shared: shared
-  - .@prepare_ref: prepare_ref
-  - .@prepare_train: prepare_train
+  - .@setup_train_inputs: setup_train_inputs
+  - .@setup_train_targets: setup_train_targets
   - .@train: train
   - .@model: model
   - _self_
@@ -27,11 +27,9 @@ hydra:
 # If you wish to skip a step, set its value to null or true as below.
 # This can be also done from command-line when running the script, e.g.
 # python run.py prepare_data.run=false
-prepare_ref:
-  run: false
-  for_eval: false
-prepare_train:
-  run: false
-  for_eval: false
-train:
+setup_train_targets:
   run: true
+setup_train_inputs:
+  run: true
+train:
+  run: false
