@@ -26,12 +26,6 @@ fi
 # Activate the environment
 conda activate "$ENV_NAME"
 
-# Add conda-forge as a high-priority channel (if not already present)
-if ! conda config --show channels | grep -q "conda-forge"; then
-    conda config --add channels conda-forge
-    conda config --set channel_priority strict
-fi
-
 # Install dependencies
 if [[ -f environment.yaml ]]; then
     conda env update --file environment.yaml
