@@ -9,6 +9,9 @@ scratch/
 # Data folders
 data/*
 !data/.gitkeep
+
+
+# Experiment directories
 exp
 
 # Byte-compiled / optimized / DLL files
