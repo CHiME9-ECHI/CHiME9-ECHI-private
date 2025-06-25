@@ -68,8 +68,7 @@ def wav_file_name(
     output_dir: Path, stem: str, index: int, start_sample: int, end_sample: int
 ) -> Path:
     """Construct the wav file name based on session, device, and pid."""
-    return Path(output_dir) / f"{stem}.{index:03g}.wav"
-    # return Path(output_dir) / f"{stem}.{index:03g}.{start_sample}_{end_sample}.wav"
+    return Path(output_dir) / f"{stem}.{index:03g}.{start_sample}_{end_sample}.wav"
 
 
 def segment_signal(
@@ -106,16 +105,15 @@ def segment_signal(
         with open(wav_file, "rb") as f:
             signal, fs = sf.read(f)
 
+    assert (
+        fs == seg_sample_rate
+    ), f"Expected to load audio at {seg_sample_rate}Hz but found {fs}Hz for {wav_file}"
     logging.debug(f"Will generate {len(segments)} segments from {wav_file}")
-    sample_scalar = fs / seg_sample_rate
-    # collar_samples = fs * collar_ms
-    sample_scalar = 1
-    collar_samples = 0
 
     for segment in segments:
         index = int(segment["index"])
-        start_sample = int(int(segment["start"]) * sample_scalar) - collar_samples
-        end_sample = int(int(segment["end"]) * sample_scalar) + collar_samples
+        start_sample = int(int(segment["start"]))
+        end_sample = int(int(segment["end"]))
 
         output_file = wav_file_name(
             output_dir, Path(csv_file).stem, index, start_sample, end_sample

@@ -2,21 +2,25 @@
 # The values refer to configuration files of the individual steps.
 
 defaults:
-  - .@paths: paths
-  - .@shared: shared
-  - .@setup_train_inputs: setup_train_inputs
-  - .@setup_train_targets: setup_train_targets
+  - .@paths: ../paths
+  - .@shared: ../shared
+  - .@unpack: unpack
+  - .@dataset: dataset
   - .@train: train
   - .@model: model
   - _self_
 
+# Signal info
+device: aria
+sample_rate: 16000
+
+# WandB logging info
 wandb:
   entity: robbiesuth97-university-of-sheffield
   project: echi-baseline-dev
 
 # Setting up paths for outputs of the experiments
-exp_name: base
-base_dir: exp/${exp_name}
+base_dir: ${paths.scratch}/experiments/${shared.exp_name}
 hydra:
   run:
     dir: ${base_dir}/hydra
@@ -27,9 +31,7 @@ hydra:
 # If you wish to skip a step, set its value to null or true as below.
 # This can be also done from command-line when running the script, e.g.
 # python run.py prepare_data.run=false
-setup_train_targets:
-  run: true
-setup_train_inputs:
+unpack:
   run: true
 train:
-  run: false
+  run: true

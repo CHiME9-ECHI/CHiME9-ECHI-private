@@ -46,7 +46,7 @@ class LossTracker:
         self.steps = 0
 
 
-class Helper:
+class Gromit:
     def __init__(
         self, epochs, loss_name, output_path, debug, wandb_entity, wandb_project
     ):

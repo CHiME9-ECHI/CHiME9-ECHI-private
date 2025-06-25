@@ -1,4 +1,5 @@
 import torch
+from omegaconf import DictConfig
 from tqdm import tqdm
 import logging
 from torch_stoi import NegSTOILoss
@@ -7,10 +8,37 @@ from torch.utils.data.dataloader import DataLoader
 from train.echi import ECHI, collate_fn
 from train.model_tools import get_model
 from train.losses import get_loss
-from train.model_tools import get_device, Helper
+from train.model_tools import get_device, Gromit
 from train.signal_prep import STFTWrapper, match_length, AudioPrep
 
 torch.manual_seed(666)
+
+
+def get_dataset(
+    split: str,
+    data_cfg: DictConfig,
+    noisy_prepper: AudioPrep,
+    ref_prepper: AudioPrep,
+    spk_prepper: AudioPrep,
+):
+    data = ECHI(
+        split,
+        data_cfg.device,
+        data_cfg.noisy_signal,
+        data_cfg.ref_signal,
+        data_cfg.rainbow_signal,
+        data_cfg.sessions_file,
+        data_cfg.segments_file,
+        True,
+        noisy_prepper,
+        ref_prepper,
+        spk_prepper,
+    )
+    data_len = len(data)
+    samples = [data.__getitem__(i * data_len // 5)["id"] for i in range(1, 4)]
+    loader = DataLoader(data, **data_cfg.loader[split], collate_fn=collate_fn)
+
+    return loader, samples
 
 
 def save_sample(
@@ -22,7 +50,7 @@ def save_sample(
     epoch: int,
     noisy: torch.Tensor,
     target: torch.Tensor,
-    gromit: Helper,
+    gromit: Gromit,
 ):
     saves = list(set(batch_scenes) & set(save_scenes))
     if not saves:
@@ -82,7 +110,7 @@ def check_lengths(
 
 
 def run(
-    paths_cfg,
+    data_cfg,
     model_cfg,
     train_cfg,
     exp_dir,
@@ -94,7 +122,7 @@ def run(
     device = get_device()
 
     # Training helper
-    gromit = Helper(
+    gromit = Gromit(
         train_cfg.epochs,
         train_cfg.loss.name,
         exp_dir,
@@ -124,7 +152,7 @@ def run(
         output_rms=model_cfg.input.rms,
         device="cpu",
     )
-    target_prepper = AudioPrep(
+    ref_prepper = AudioPrep(
         output_channels=1,
         input_sr=16000,
         output_sr=model_cfg.input.sample_rate,
@@ -139,35 +167,13 @@ def run(
         device="cpu",
     )
 
-    trainset = ECHI(
-        "train",
-        "aria",
-        paths_cfg.train_input_dir,
-        paths_cfg.train_target_dir,
-        paths_cfg.rainbow_signal_dir,
-        paths_cfg.sessions_file,
-        debug,
-        noisy_prepper,
-        target_prepper,
-        spk_prepper,
+    trainset, trainsaves = get_dataset(
+        "train", data_cfg, noisy_prepper, ref_prepper, spk_prepper
     )
-    trainsaves = [trainset.__getitem__(i)["id"] for i in range(3)]
-    trainset = DataLoader(trainset, 1, True, num_workers=0, collate_fn=collate_fn)
 
-    devset = ECHI(
-        "dev",
-        "aria",
-        paths_cfg.train_input_dir,
-        paths_cfg.train_target_dir,
-        paths_cfg.rainbow_signal_dir,
-        paths_cfg.sessions_file,
-        debug,
-        noisy_prepper,
-        target_prepper,
-        spk_prepper,
+    devset, devsaves = get_dataset(
+        "dev", data_cfg, noisy_prepper, ref_prepper, spk_prepper
     )
-    devsaves = [devset.__getitem__(i)["id"] for i in range(3)]
-    devset = DataLoader(devset, 1, False, num_workers=0, collate_fn=collate_fn)
 
     model = get_model(model_cfg, None)
     optimizer = torch.optim.Adam(model.parameters(), lr=train_cfg.lr)
@@ -195,8 +201,7 @@ def run(
 
             noisy = noisy.to(device, non_blocking=True)
             targets = targets.to(device, non_blocking=True)
-            if use_spkid:
-                spk_id = batch["spk"].to(device, non_blocking=True)
+            spk_id = batch["spkid"].to(device, non_blocking=True)
 
             if noisy.shape[-1] == 0 or targets.shape[-1] == 0:
                 logging.warning(
@@ -206,18 +211,14 @@ def run(
 
             if do_stft:
                 noisy = stft(noisy)
-                if use_spkid:
-                    spk_id = stft(spk_id)
-                    batch["spk_lens"] = (
-                        batch["spk_lens"] - stft.n_fft
-                    ) // stft.hop_length
+                spk_id = stft(spk_id)
+                batch["spkid_lens"] = (
+                    batch["spkid_lens"] - stft.n_fft
+                ) // stft.hop_length
 
             optimizer.zero_grad()
 
-            if use_spkid:
-                processed = model(noisy, spk_id, batch["spk_lens"]).squeeze(1)
-            else:
-                processed = model(noisy)
+            processed = model(noisy, spk_id, batch["spkid_lens"]).squeeze(1)
 
             if do_stft:
                 processed = stft.inverse(processed)
@@ -266,9 +267,7 @@ def run(
 
                     noisy = noisy.to(device, non_blocking=True)
                     targets = targets.to(device, non_blocking=True)
-
-                    if use_spkid:
-                        spk_id = batch["spk"].to(device, non_blocking=True)
+                    spk_id = batch["spkid"].to(device, non_blocking=True)
 
                     if noisy.shape[-1] == 0 or targets.shape[-1] == 0:
                         logging.warning(
@@ -278,16 +277,12 @@ def run(
 
                     if do_stft:
                         noisy = stft(noisy)
-                        if use_spkid:
-                            spk_id = stft(spk_id)
-                            batch["spk_lens"] = (
-                                batch["spk_lens"] - stft.n_fft
-                            ) // stft.hop_length
+                        spk_id = stft(spk_id)
+                        batch["spkid_lens"] = (
+                            batch["spkid_lens"] - stft.n_fft
+                        ) // stft.hop_length
 
-                    if use_spkid:
-                        processed = model(noisy, spk_id, batch["spk_lens"]).squeeze(1)
-                    else:
-                        processed = model(noisy)
+                    processed = model(noisy, spk_id, batch["spkid_lens"]).squeeze(1)
 
                     if do_stft:
                         processed = stft.inverse(processed)

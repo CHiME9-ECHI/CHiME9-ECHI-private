@@ -18,6 +18,8 @@ def get_session_tuples(session_file, devices, datasets):
     """Get session tuples for the specified datasets and devices."""
     if isinstance(datasets, str):
         datasets = [datasets]
+    if isinstance(devices, str):
+        devices = [devices]
 
     sessions = []
 
@@ -25,9 +27,6 @@ def get_session_tuples(session_file, devices, datasets):
         with open(session_file.format(dataset=ds), "r") as f:
             sessions += list(csv.DictReader(f))
 
-    # Filter sessions for the specified datasets
-    # if datasets is not None:
-    #     sessions = [s for s in sessions if s["session"].startswith(tuple(datasets[0]))]
     session_device_pid_tuples = []
 
     for device, session in itertools.product(devices, sessions):
@@ -36,7 +35,7 @@ def get_session_tuples(session_file, devices, datasets):
         for pid in pids:
             session_device_pid_tuples.append((session["session"], device, pid))
 
-    return session_device_pid_tuples[:1]
+    return session_device_pid_tuples[:2] + session_device_pid_tuples[-2:]
 
 
 def read_wav_files_and_sum(wav_files) -> tuple[np.ndarray, int]:
@@ -69,12 +68,9 @@ def read_wav_files_and_sum(wav_files) -> tuple[np.ndarray, int]:
     return sum_signal, fs
 
 
-def wav_file_name(
-    output_dir: Path, stem: str, index: int, start_sample: int, end_sample: int
-) -> Path:
+def wav_file_name(output_dir: Path, stem: str, index: int) -> Path:
     """Construct the wav file name based on session, device, and pid."""
     return Path(output_dir) / f"{stem}.{index:03g}.wav"
-    # return Path(output_dir) / f"{stem}.{index:03g}.{start_sample}_{end_sample}.wav"
 
 
 def segment_signal(
@@ -92,11 +88,7 @@ def segment_signal(
     files_missing = False
     for segment in segments:
         expected_files = wav_file_name(
-            output_dir,
-            Path(csv_file).stem,
-            int(segment["index"]),
-            int(segment["start"]),
-            int(segment["end"]),
+            output_dir, Path(csv_file).stem, int(segment["index"])
         )
         if not expected_files.exists():
             files_missing = True
@@ -113,18 +105,13 @@ def segment_signal(
 
     logging.debug(f"Will generate {len(segments)} segments from {wav_file}")
     sample_scalar = fs / seg_sample_rate
-    # collar_samples = fs * collar_ms
-    sample_scalar = 1
-    collar_samples = 0
 
     for segment in segments:
         index = int(segment["index"])
-        start_sample = int(int(segment["start"]) * sample_scalar) - collar_samples
-        end_sample = int(int(segment["end"]) * sample_scalar) + collar_samples
+        start_sample = int(int(segment["start"]) * sample_scalar)
+        end_sample = int(int(segment["end"]) * sample_scalar)
 
-        output_file = wav_file_name(
-            output_dir, Path(csv_file).stem, index, start_sample, end_sample
-        )
+        output_file = wav_file_name(output_dir, Path(csv_file).stem, index)
         if output_file.exists():
             logging.debug(f"Segment {output_file} already exists, skipping")
             continue
@@ -132,6 +119,8 @@ def segment_signal(
             logging.warning(f"Segment {output_file} exceeds signal length. Skipping.")
             continue
         signal_segment = signal[start_sample:end_sample]
+        if output_file.name[:2] == "._":
+            print(wav_file)
         with open(output_file, "wb") as f:
             sf.write(f, signal_segment, samplerate=fs)
 
@@ -168,22 +157,6 @@ def segment_all_signals(
             continue
 
         segment_signal(wav_file, csv_file, output_dir, seg_sample_rate)
-
-        # Segment the summed reference signal using this PIDs segment info
-        output_dir = output_dir_template.format(
-            dataset=dataset, device=device, segment_type="summed"
-        )
-        logging.debug(f"Segmenting {device}, {pid} reference signals into {output_dir}")
-
-        pids = [p for s, d, p in session_tuples if s == session and d == device]
-        wav_files = [
-            signal_template.format(
-                dataset=dataset, session=session, device=device, pid=pid
-            )
-            for pid in pids
-        ]
-
-        segment_signal(wav_files, csv_file, output_dir, seg_sample_rate)
 
 
 def get_rms(signal: torch.Tensor) -> torch.Tensor:
