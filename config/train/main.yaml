@@ -28,8 +28,8 @@ hydra:
 # This can be also done from command-line when running the script, e.g.
 # python run.py prepare_data.run=false
 setup_train_targets:
-  run: false
-setup_train_inputs:
-  run: false
-train:
   run: true
+setup_train_inputs:
+  run: true
+train:
+  run: false

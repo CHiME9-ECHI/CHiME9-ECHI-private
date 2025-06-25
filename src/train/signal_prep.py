@@ -36,7 +36,7 @@ def get_session_tuples(session_file, devices, datasets):
         for pid in pids:
             session_device_pid_tuples.append((session["session"], device, pid))
 
-    return session_device_pid_tuples
+    return session_device_pid_tuples[:1]
 
 
 def read_wav_files_and_sum(wav_files) -> tuple[np.ndarray, int]:
@@ -421,46 +421,3 @@ class STFTWrapper(torch.nn.Module):
             x = x.reshape(batch, chan, -1)
 
         return x
-
-
-### Function below is OBSOLETE and marked for removal before release.
-
-
-# def segment_signal_dir(
-#     signal_dir: Path | str,
-#     segment_info_dir: Path | str,
-#     output_dir: Path | str,
-#     segment_sample_rate: int,
-#     segment_collar: int,
-#     file_pattern: str = "*",
-#     translate_id: Optional[str] = None,
-# ) -> None:
-#     """Extract speech segments from all signals in a directory"""
-#     logging.info("Segmenting signals...")
-#     if translate_id == "pid_wav":
-#         translate_fn = csv_to_pid_wav
-#     elif translate_id == "device_wav":
-#         translate_fn = csv_to_device_wav
-
-#     output_dir = Path(output_dir)
-#     if not output_dir.exists():
-#         output_dir.mkdir(parents=True, exist_ok=True)
-
-#     # Find all the csv segmentation files to process...
-#     csv_files = list(Path(segment_info_dir).glob(file_pattern))
-#     # ... and find their corresponding wav files
-#     wav_files = [
-#         Path(signal_dir) / translate_fn(str(csv_file.name)) for csv_file in csv_files
-#     ]
-
-#     n_files = len(wav_files)
-
-#     for wav_file, csv_file in tqdm(
-#         zip(wav_files, csv_files), desc="Segmenting...", total=n_files
-#     ):
-#         if not wav_file.exists():
-#             logging.error(f"Missing wav file: {wav_file}")
-#             continue
-#         segment_signal(
-#             wav_file, csv_file, Path(output_dir), segment_sample_rate, segment_collar
-#         )

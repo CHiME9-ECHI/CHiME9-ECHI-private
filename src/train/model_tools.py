@@ -7,8 +7,8 @@ import logging
 import numpy as np
 import torchaudio
 
-from CausalMCxTFGridNet import MCxTFGridNet
-from file_utils import read_json, write_json
+from train.CausalMCxTFGridNet import MCxTFGridNet
+from train.file_utils import read_json, write_json
 
 
 def get_model(cfg: DictConfig, ckpt_path: Optional[Path] = None) -> torch.nn.Module:

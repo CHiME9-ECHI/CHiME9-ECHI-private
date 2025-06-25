@@ -7,7 +7,7 @@ import hydra
 from omegaconf import OmegaConf
 
 from scripts.setup import setup
-from scripts.train import run
+from scripts.train.train import run
 
 
 @hydra.main(version_base=None, config_path="config", config_name="main_train")

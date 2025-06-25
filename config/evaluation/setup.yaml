@@ -1,10 +1,9 @@
 input_signal_file: ${..paths.ref_signal_file}
 segment_info_file: ${..paths.segment_info_file}
-segment_sample_rate: ${..shared.sample_rate}
+segment_sample_rate: ${..sample_rate}
 
 output_segment_dir: ${..paths.ref_segment_dir}
 
-# dataset: ${..shared.dataset}
-dataset: [train, dev]
-devices: [ha, aria]
+dataset: ${dataset}
+devices: ${devices}
 sessions_file: ${..paths.sessions_file}

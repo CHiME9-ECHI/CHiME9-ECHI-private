@@ -5,16 +5,11 @@ import logging
 import hydra
 from omegaconf import DictConfig
 
-from signal_tools import get_session_tuples, segment_all_signals
+from evaluation.signal_tools import get_session_tuples, segment_all_signals
 
 
 def prepare(cfg):
     logging.info("Running preparation for evaluation")
-
-    # if cfg.for_eval:
-    #     datasets = [cfg.dataset]
-    # else:
-    #     datasets = ["train", "dev"]
     # Segment the enhanced signals
 
     session_tuples = get_session_tuples(

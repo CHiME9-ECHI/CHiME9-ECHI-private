@@ -9,7 +9,7 @@ from pathlib import Path
 from torch.utils.data import Dataset
 import pandas as pd
 
-from signal_tools import AudioPrep, combine_audio_list
+from evaluation.signal_tools import AudioPrep, combine_audio_list
 
 
 from typing import Any
