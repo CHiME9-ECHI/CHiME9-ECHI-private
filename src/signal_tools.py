@@ -26,8 +26,8 @@ def get_session_tuples(session_file, devices, datasets):
             sessions += list(csv.DictReader(f))
 
     # Filter sessions for the specified datasets
-    if datasets is not None:
-        sessions = [s for s in sessions if s["session"].startswith(tuple(datasets[0]))]
+    # if datasets is not None:
+    #     sessions = [s for s in sessions if s["session"].startswith(tuple(datasets[0]))]
     session_device_pid_tuples = []
 
     for device, session in itertools.product(devices, sessions):
@@ -167,7 +167,7 @@ def segment_all_signals(
             logging.warning(f"WARNING: csv file not found at {csv_file}")
             continue
 
-        segment_signal(wav_file, csv_file, output_dir)
+        segment_signal(wav_file, csv_file, output_dir, seg_sample_rate)
 
         # Segment the summed reference signal using this PIDs segment info
         output_dir = output_dir_template.format(
