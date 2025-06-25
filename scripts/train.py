@@ -4,13 +4,11 @@ import logging
 from torch_stoi import NegSTOILoss
 from torch.utils.data.dataloader import DataLoader
 
-from dataloaders.echi import ECHI, collate_fn
-from models import get_model
+from echi import ECHI, collate_fn
+from model_tools import get_model
 from losses import get_loss
-from utils.misc import check_cfg_item, get_device
-from utils.train_helper import Helper
-from utils.signal_utils import STFTWrapper, match_length
-from utils.audio_prep import AudioPrep
+from model_tools import get_device, Helper
+from signal_tools import STFTWrapper, match_length, AudioPrep
 
 torch.manual_seed(666)
 
@@ -102,7 +100,7 @@ def run(paths_cfg, model_cfg, train_cfg, debug, wandb_entity=None, wandb_project
     else:
         do_stft = False
 
-    use_spkid = check_cfg_item(model_cfg.input, "use_spkid")
+    use_spkid = model_cfg.input.use_spkid
     if use_spkid is None:
         use_spkid = False
 
@@ -131,8 +129,8 @@ def run(paths_cfg, model_cfg, train_cfg, debug, wandb_entity=None, wandb_project
     trainset = ECHI(
         "train",
         "aria",
-        paths_cfg.device_segment_dir,
-        paths_cfg.ref_segment_dir,
+        paths_cfg.train_input_dir,
+        paths_cfg.train_target_dir,
         paths_cfg.rainbow_signal_dir,
         "data/chime9_echi/sessions.{dataset}.csv",
         debug,
@@ -158,7 +156,7 @@ def run(paths_cfg, model_cfg, train_cfg, debug, wandb_entity=None, wandb_project
     devsaves = [devset.__getitem__(i)["id"] for i in range(3)]
     devset = DataLoader(devset, 1, False, num_workers=0, collate_fn=collate_fn)
 
-    model = get_model(model_cfg)
+    model = get_model(model_cfg, None)
     optimizer = torch.optim.Adam(model.parameters(), lr=train_cfg.lr)
     loss_fn = get_loss(train_cfg.loss.name, train_cfg.loss.kwargs)
     stoi_fn = NegSTOILoss(model_cfg.input.sample_rate).to(device)

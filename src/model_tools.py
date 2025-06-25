@@ -1,13 +1,31 @@
-from pathlib import Path
+import torch
 from hydra.core.hydra_config import HydraConfig
+from omegaconf import DictConfig
+from typing import Optional
+from pathlib import Path
+import wandb
 import logging
 import numpy as np
-import torch
 import torchaudio
-import wandb
 
-from utils.file_utils import read_json, write_json, read_txt, write_txt
-from utils.run_names import RUN_NAMES
+from CausalMCxTFGridNet import MCxTFGridNet
+from file_utils import read_json, write_json
+
+
+def get_model(cfg: DictConfig, ckpt_path: Optional[Path] = None) -> torch.nn.Module:
+    model = MCxTFGridNet(**cfg.params)
+
+    if ckpt_path is not None:
+        ckpt = torch.load(ckpt_path)
+        model.load_state_dict(ckpt)
+
+    return model
+
+
+def get_device():
+    if torch.cuda.is_available():
+        return "cuda"
+    return "cpu"
 
 
 class LossTracker:
@@ -53,31 +71,10 @@ class Helper:
         self.ckpt_dir = self.output_path / "checkpoints"
         self.ckpt_dir.mkdir(parents=True, exist_ok=True)
 
-    def write_runname(self):
-        pokemon = set(RUN_NAMES)
-        hydra_dir = self.output_path.parent
-        other_runs = hydra_dir.glob("*")
-
-        used_names = []
-        for run in other_runs:
-            name_fpath = run / "name.txt"
-            if name_fpath.exists():
-                used_names.append(read_txt(name_fpath))
-
-        used_names = set(used_names)
-        available_names = list(pokemon.difference(used_names))
-
-        if len(available_names) == 0:
-            raise ValueError("Run out of names!")
-
-        name = np.random.choice(available_names, 1)[0]
-        write_txt(self.output_path / "name.txt", name)
-
     def start_training(self):
         write_json(self.json_name, [])
 
         run_name = self.output_path.name
-        self.write_runname()
 
         if not self.debug:
             wandb.init(
@@ -163,12 +160,3 @@ class Helper:
 
     def get_ckpt_path(self, epoch):
         return self.ckpt_dir / f"epoch{str(epoch).zfill(3)}.pt"
-
-    def set_run_name(self, tracker):
-        old_names = [x["name"] for x in tracker]
-        options = [x for x in RUN_NAMES if x not in old_names]
-
-        if len(options) == 0:
-            logging.error("ALL NAMES USED")
-
-        return np.random.choice(options)

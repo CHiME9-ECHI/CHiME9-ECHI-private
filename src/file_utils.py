@@ -1,7 +1,6 @@
 import json
 import soundfile as sf
 from pathlib import Path
-from typing import Union
 
 
 def read_json(path: Path):
@@ -13,18 +12,6 @@ def read_json(path: Path):
 def write_json(path: Path, data: list[dict]):
     with open(path, "w") as file:
         json.dump(data, file, indent=4)
-
-
-def read_txt(fpath: Union[str, Path]):
-    with open(fpath, "r") as file:
-        data = file.read()
-
-    return data
-
-
-def write_txt(fpath: Union[str, Path], thing: str):
-    with open(fpath, "r") as file:
-        file.write(thing)
 
 
 def get_audio_len(path: Path, unit: str):
