@@ -12,7 +12,7 @@ import torch
 import yaml
 from omegaconf import DictConfig
 
-from evaluation.signal_tools import get_session_tuples
+from evaluation.segment_signals import get_session_tuples
 
 
 def load_audio_files(

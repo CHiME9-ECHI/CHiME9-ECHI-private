@@ -4,11 +4,11 @@ import logging
 from torch_stoi import NegSTOILoss
 from torch.utils.data.dataloader import DataLoader
 
-from echi import ECHI, collate_fn
+from train.echi import ECHI, collate_fn
 from train.model_tools import get_model
-from losses import get_loss
+from train.losses import get_loss
 from train.model_tools import get_device, Helper
-from evaluation.signal_tools import STFTWrapper, match_length, AudioPrep
+from train.signal_prep import STFTWrapper, match_length, AudioPrep
 
 torch.manual_seed(666)
 

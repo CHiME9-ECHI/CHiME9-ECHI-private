@@ -6,11 +6,11 @@ import logging
 import hydra
 from omegaconf import OmegaConf
 
-from scripts.setup import setup
+from scripts.train.setup import setup
 from scripts.train.train import run
 
 
-@hydra.main(version_base=None, config_path="config", config_name="main_train")
+@hydra.main(version_base=None, config_path="config/train", config_name="main")
 def main(cfg):
     logging.info(f"Hydra config:\n{OmegaConf.to_yaml(cfg, resolve=True)}")
 

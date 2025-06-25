@@ -11,7 +11,7 @@ import hydra
 import numpy as np
 from omegaconf import DictConfig
 
-from evaluation.signal_tools import get_session_tuples
+from evaluation.segment_signals import get_session_tuples
 
 
 def read_jsonl(file_path, data=None):

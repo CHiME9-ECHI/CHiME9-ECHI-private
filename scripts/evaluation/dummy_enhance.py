@@ -15,7 +15,7 @@ from librosa import resample
 from omegaconf import DictConfig
 from tqdm import tqdm
 
-from evaluation.signal_tools import get_session_tuples
+from evaluation.segment_signals import get_session_tuples
 
 
 def dummy_enhance_for_session(

@@ -5,7 +5,7 @@ import logging
 import hydra
 from omegaconf import DictConfig
 
-from evaluation.signal_tools import get_session_tuples, segment_all_signals
+from evaluation.segment_signals import get_session_tuples, segment_all_signals
 
 
 def prepare(cfg):
