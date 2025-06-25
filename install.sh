@@ -28,9 +28,9 @@ conda activate "$ENV_NAME"
 
 # Install dependencies
 if [[ -f environment.yaml ]]; then
-    conda env update --file environment.yaml
+    conda env update --name "$ENV_NAME" --file environment.yaml --prune
 else
-    echo "ERROR: requirements.txt not found"
+    echo "ERROR: environment.yaml not found"
     exit 1
 fi
 
