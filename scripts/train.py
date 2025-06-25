@@ -81,13 +81,26 @@ def check_lengths(
     return processed, target, use_val
 
 
-def run(paths_cfg, model_cfg, train_cfg, debug, wandb_entity=None, wandb_project=None):
+def run(
+    paths_cfg,
+    model_cfg,
+    train_cfg,
+    exp_dir,
+    debug,
+    wandb_entity=None,
+    wandb_project=None,
+):
 
     device = get_device()
 
     # Training helper
     gromit = Helper(
-        train_cfg.epochs, train_cfg.loss.name, debug, wandb_entity, wandb_project
+        train_cfg.epochs,
+        train_cfg.loss.name,
+        exp_dir,
+        debug,
+        wandb_entity,
+        wandb_project,
     )
 
     # Model and training bits and bobs

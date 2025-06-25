@@ -1,5 +1,4 @@
 import torch
-from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig
 from typing import Optional
 from pathlib import Path
@@ -48,7 +47,9 @@ class LossTracker:
 
 
 class Helper:
-    def __init__(self, epochs, loss_name, debug, wandb_entity, wandb_project):
+    def __init__(
+        self, epochs, loss_name, output_path, debug, wandb_entity, wandb_project
+    ):
         self.debug = debug
         self.epochs = epochs
         self.loss_name = loss_name
@@ -60,7 +61,7 @@ class Helper:
         self.val_loss = LossTracker()
         self.val_stoi = LossTracker()
 
-        self.output_path = Path(HydraConfig.get().runtime.output_dir)
+        self.output_path = Path(output_path)
         self.json_name = self.output_path / "train_log.json"
 
         self.train_sampledir = self.output_path / "train_samples"
