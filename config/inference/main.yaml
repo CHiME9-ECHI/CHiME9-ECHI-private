@@ -6,11 +6,20 @@ defaults:
   - .@shared: ../shared
   - _self_
 
+# Experiment name
+exp_name: ${shared.exp_name}
+
 # Info for which signals to evaluate
-segment_types: [individual] # [individual, summed] # Types of reference segments to process
 devices: [aria] # Devices to process
 dataset: dev # Dataset to use for processing
 sample_rate: 16000
+
+# Input filepaths
+noisy_signal: ${paths.echi_signal}
+rainbow_signal: ${paths.rainbow_signal_file}
+
+enhanced_signal: ${paths.enhanced_signal}
+sessions_file: ${paths.sessions_file}
 
 # Setting up paths for outputs of the experiments
 base_dir: ${paths.scratch}/experiments/${shared.exp_name}
