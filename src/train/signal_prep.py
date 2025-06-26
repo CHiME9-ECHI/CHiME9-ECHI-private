@@ -31,6 +31,11 @@ def get_session_tuples(session_file, devices, datasets):
 
     for device, session in itertools.product(devices, sessions):
         device_pos = "pos" + session[f"{device}_pos"]
+
+        if device_pos not in POSITIONS:
+            logging.warning(f"Device {device} not found for session {session}")
+            continue
+
         pids = [session[pos] for pos in POSITIONS if pos != device_pos]
         for pid in pids:
             session_device_pid_tuples.append((session["session"], device, pid))
