@@ -4,11 +4,6 @@
 defaults:
   - .@paths: ../paths
   - .@shared: ../shared
-  - .@setup: setup
-  - .@validate: validate
-  - .@prepare: prepare
-  - .@evaluate: evaluate
-  - .@report: report
   - _self_
 
 # Info for which signals to evaluate
@@ -29,13 +24,3 @@ hydra:
 # If you wish to skip a step, set its value to null or true as below.
 # This can be also done from command-line when running the script, e.g.
 # python run.py setup.run=false
-setup:
-  run: true
-validate:
-  run: true
-prepare:
-  run: true
-evaluate:
-  run: true
-report:
-  run: true

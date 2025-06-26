@@ -6,7 +6,7 @@ import logging
 import hydra
 from omegaconf import OmegaConf
 
-from scripts.evaluation.dummy_enhance import dummy_enhance as enhance
+from scripts.inference.dummy_enhance import dummy_enhance as enhance
 from scripts.evaluation.evaluate import evaluate
 from scripts.evaluation.prepare import prepare
 from scripts.evaluation.report import report
