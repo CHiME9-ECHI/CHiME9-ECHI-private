@@ -10,6 +10,7 @@ scratch/
 data/*
 !data/.gitkeep
 
+
 # Experiment directories
 exp
 

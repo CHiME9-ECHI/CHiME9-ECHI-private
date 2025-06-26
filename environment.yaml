@@ -3,8 +3,8 @@ channels:
   - conda-forge
   - pytorch
 dependencies:
-  - ctc-segmentation
   - cython
+  - espnet
   - hydra-core
   - hydra-submitit-launcher
   - librosa
@@ -13,7 +13,6 @@ dependencies:
   - omegaconf
   - pip
   - pysoundfile
-  - pyworld
   - pytorch
   - torchaudio
   - torchmetrics
@@ -23,5 +22,3 @@ dependencies:
       - auraloss
       - torch-stoi
       - sentencepiece
-      - espnet
-      - pysptk
