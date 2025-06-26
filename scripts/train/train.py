@@ -9,7 +9,7 @@ from train.echi import ECHI, collate_fn
 from shared.core_utils import get_model, get_device
 from train.losses import get_loss
 from train.gromit import Gromit
-from train.signal_prep import STFTWrapper, match_length, AudioPrep
+from shared.signal_utils import STFTWrapper, match_length, AudioPrep
 
 torch.manual_seed(666)
 
