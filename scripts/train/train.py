@@ -6,9 +6,9 @@ from torch_stoi import NegSTOILoss
 from torch.utils.data.dataloader import DataLoader
 
 from train.echi import ECHI, collate_fn
-from train.model_tools import get_model
+from shared.core_utils import get_model, get_device
 from train.losses import get_loss
-from train.model_tools import get_device, Gromit
+from train.gromit import Gromit
 from train.signal_prep import STFTWrapper, match_length, AudioPrep
 
 torch.manual_seed(666)
