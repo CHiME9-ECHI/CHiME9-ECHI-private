@@ -40,7 +40,7 @@ def get_session_tuples(session_file, devices, datasets):
         for pid in pids:
             session_device_pid_tuples.append((session["session"], device, pid))
 
-    return session_device_pid_tuples[:2] + session_device_pid_tuples[-2:]
+    return session_device_pid_tuples
 
 
 def read_wav_files_and_sum(wav_files) -> tuple[np.ndarray, int]:
