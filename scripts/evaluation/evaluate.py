@@ -36,10 +36,8 @@ def load_audio_files(
         ]
 
     file_list.sort()
-    file_list = file_list[:5]
 
     file_list = file_list[batch[0] - 1 :: batch[1]]  # Form list for batch
-    print(file_list)
     tmp_filelist = tempfile.NamedTemporaryFile(
         delete=False, mode="w", suffix=".scp"
     ).name
