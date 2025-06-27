@@ -58,4 +58,4 @@ def get_session_tuples(session_file, devices, datasets):
         for pid in pids:
             session_device_pid_tuples.append((session["session"], device, pid))
 
-    return session_device_pid_tuples
+    return session_device_pid_tuples[:1]

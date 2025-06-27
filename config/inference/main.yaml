@@ -22,7 +22,7 @@ enhanced_signal: ${paths.enhanced_signal}
 sessions_file: ${paths.sessions_file}
 
 # Setting up paths for outputs of the experiments
-base_dir: ${paths.scratch}/experiments/${shared.exp_name}
+base_dir: ${paths.scratch}/experiments/${shared.exp_name}/inference
 hydra:
   run:
     dir: ${base_dir}/hydra

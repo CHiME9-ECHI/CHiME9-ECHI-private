@@ -1,12 +1,18 @@
 from typing import Callable
+from pathlib import Path
 
 
-def get_enhance_fn(name: str) -> tuple[Callable, dict]:
+def get_enhance_fn(exp_dir: Path) -> tuple[Callable, dict]:
+
+    name = exp_dir.name
+
     if name == "passthrough":
         from inference.passthrough import process_session
 
         return process_session, {"target_sr": 16000}
     elif name == "baseline":
-        return print, {}
+        from inference.baseline import get_process
+
+        return get_process(exp_dir)
 
     raise ValueError(f"Enhance option {name} not recognised. Add code here!")

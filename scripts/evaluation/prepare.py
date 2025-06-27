@@ -14,7 +14,7 @@ def prepare(cfg):
 
     session_tuples = get_session_tuples(
         cfg.sessions_file, cfg.devices, datasets=[cfg.dataset]
-    )
+    )[:1]
 
     segment_all_signals(
         signal_template=cfg.enhanced_signal,

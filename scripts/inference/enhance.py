@@ -18,8 +18,7 @@ def enhance_all_sessions(cfg):
     session_tuples = get_session_tuples(
         cfg.sessions_file, cfg.devices, datasets=cfg.dataset
     )
-
-    enhance_fn, kwargs = get_enhance_fn(cfg.exp_name)
+    enhance_fn, kwargs = get_enhance_fn(Path(cfg.base_dir).parent)
 
     for session, device, pid in tqdm(session_tuples):
         dataset = session.split("_")[0]

@@ -203,12 +203,6 @@ def run(
             targets = targets.to(device, non_blocking=True)
             spk_id = batch["spkid"].to(device, non_blocking=True)
 
-            if noisy.shape[-1] == 0 or targets.shape[-1] == 0:
-                logging.warning(
-                    f"Bad audio! {batch['id']} noisy: {noisy.shape} target: {targets.shape}"
-                )
-                continue
-
             if do_stft:
                 noisy = stft(noisy)
                 spk_id = stft(spk_id)

@@ -18,7 +18,7 @@ dataset: dev # Dataset to use for processing
 sample_rate: 16000
 
 # Setting up paths for outputs of the experiments
-base_dir: ${paths.scratch}/experiments/${shared.exp_name}
+base_dir: ${paths.scratch}/experiments/${shared.exp_name}/evaluation
 hydra:
   run:
     dir: ${base_dir}/hydra
