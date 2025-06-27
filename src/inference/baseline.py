@@ -31,35 +31,42 @@ def enhance(
 
     output = torch.zeros(duration)
 
-    window_time = 10
+    window_time = 60
     overlap = 1 / 8
 
     window_samples = window_time * noisy_prep.output_sr
     window_samples -= (window_samples - stft.n_fft) % stft.hop_length
-    stride = int(window_samples * overlap)
-    overlap_samples = window_samples - stride
+    overlap_samples = int(window_samples * overlap)
+    stride = window_samples - overlap_samples
 
-    for start in range(0, noisy_audio.shape[-1], stride):
-        end = start + window_samples
-        if end > duration:
-            end = duration + 1
+    print("window", window_samples // noisy_prep.output_sr)
+    print("stride", stride / noisy_prep.output_sr)
 
-        snippet = noisy_audio[:, start:end]
-        snippet = stft(snippet)
-        snippet = snippet.unsqueeze(0)
+    model.eval()
+    with torch.no_grad():
+        for start in range(0, noisy_audio.shape[-1], stride):
+            print(start)
+            end = start + window_samples
+            if end > duration:
+                end = duration + 1
 
-        den_snippet = model(snippet, spkid_stft, spkid_lens)
+            snippet = noisy_audio[:, start:end]
+            snippet = stft(snippet)
+            snippet = snippet.unsqueeze(0)
 
-        den_snippet = den_snippet.squeeze(0)
-        den_snippet = stft.inverse(den_snippet)
-        den_snippet = den_snippet.squeeze(0).squeeze(0)
+            den_snippet = model(snippet, spkid_stft, spkid_lens)
 
-        if start > 0:
-            den_snippet[:overlap_samples] *= 0.5
-        if end != duration + 1:
-            den_snippet[-overlap_samples:] *= 0.5
+            den_snippet = den_snippet.squeeze(0)
+            den_snippet = stft.inverse(den_snippet)
+            den_snippet = den_snippet.squeeze(0).squeeze(0)
 
-        output[start:end] += den_snippet
+            if start > 0:
+                den_snippet[:overlap_samples] *= 0.5
+            if end != duration + 1:
+                den_snippet[-overlap_samples:] *= 0.5
+
+            output[start:end] += den_snippet
+            break
 
     return output
 
@@ -97,14 +104,14 @@ def load_kwargs(model_cfg: DictConfig):
 
     noisy_prepper = AudioPrep(
         output_channels=model_cfg.input.channels,
-        input_sr=16000,
+        input_sr=48000,
         output_sr=model_cfg.input.sample_rate,
         output_rms=model_cfg.input.rms,
         device="cpu",
     )
     spk_prepper = AudioPrep(
         output_channels=1,
-        input_sr=16000,
+        input_sr=48000,
         output_sr=model_cfg.input.sample_rate,
         output_rms=model_cfg.input.rms,
         device="cpu",

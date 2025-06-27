@@ -3,8 +3,11 @@
 import logging
 
 import hydra
+import numpy as np
 from omegaconf import DictConfig
 from pathlib import Path
+import soundfile as sf
+import torch
 import torchaudio
 from tqdm import tqdm
 
@@ -44,7 +47,16 @@ def enhance_all_sessions(cfg):
         if not enhanced_fpath.parent.exists():
             enhanced_fpath.parent.mkdir(parents=True, exist_ok=True)
 
-        torchaudio.save(enhanced_fpath, output, cfg.sample_rate)
+        if isinstance(output, torch.Tensor):
+            output = output.detach().cpu().numpy()
+
+        output = np.squeeze(output)
+
+        if output.ndim > 1:
+            raise ValueError(f"Output has too many channels: {output.shape}")
+
+        with open(enhanced_fpath, "wb") as file:
+            sf.write(file, output, cfg.sample_rate, subtype=cfg.bitdepth)
 
 
 @hydra.main(version_base=None, config_path="../config", config_name="main")
