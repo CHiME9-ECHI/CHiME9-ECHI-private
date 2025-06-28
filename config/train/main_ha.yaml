@@ -8,6 +8,7 @@ defaults:
   - .@dataloading: dataloading
   - .@train: train
   - .@model: model
+  - .@wandb: wandb
   - _self_
 
 # Signal info
@@ -21,7 +22,7 @@ debug: false
 # WandB logging info
 wandb:
   entity: robbiesuth97-university-of-sheffield
-  project: echi-baseline
+  project: CHiME9-ECHI
 
 # Setting up paths for outputs of the experiments
 base_dir: ${paths.scratch}/experiments/${shared.exp_name}/train_${device}

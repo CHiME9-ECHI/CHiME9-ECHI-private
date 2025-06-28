@@ -8,6 +8,7 @@ defaults:
   - .@dataloading: dataloading
   - .@train: train
   - .@model: model
+  - .@wandb: wandb
   - _self_
 
 # Signal info
@@ -17,11 +18,6 @@ sample_rate: 16000
 
 # Debug run
 debug: false
-
-# WandB logging info
-wandb:
-  entity: robbiesuth97-university-of-sheffield
-  project: echi-baseline
 
 # Setting up paths for outputs of the experiments
 base_dir: ${paths.scratch}/experiments/${shared.exp_name}/train_${device}
@@ -36,6 +32,6 @@ hydra:
 # This can be also done from command-line when running the script, e.g.
 # python run.py prepare_data.run=false
 unpack:
-  run: false
+  run: true
 train:
   run: true

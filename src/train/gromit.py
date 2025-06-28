@@ -43,6 +43,11 @@ class Gromit:
             and (self.wandb_entity is not None)
             and (self.wandb_project is not None)
         )
+
+        print(not self.debug)
+        print(self.wandb_entity, self.wandb_entity is not None)
+        print(self.wandb_project, self.wandb_project is not None)
+
         self.use_wandb = False
 
         self.train_loss = LossTracker()

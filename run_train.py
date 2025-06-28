@@ -18,7 +18,15 @@ def main(cfg):
         unpack(cfg.unpack)
 
     if cfg.train.run:
-        run(cfg.dataloading, cfg.model, cfg.train, cfg.base_dir, cfg.debug)
+        run(
+            cfg.dataloading,
+            cfg.model,
+            cfg.train,
+            cfg.base_dir,
+            cfg.debug,
+            cfg.wandb.entity,
+            cfg.wandb.project,
+        )
 
 
 if __name__ == "__main__":
