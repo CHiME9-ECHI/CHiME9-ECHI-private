@@ -11,7 +11,8 @@ defaults:
   - _self_
 
 # Signal info
-device: aria
+device: ha
+audio_channels: 4
 sample_rate: 16000
 
 # Debug run
@@ -23,7 +24,7 @@ wandb:
   project: echi-baseline
 
 # Setting up paths for outputs of the experiments
-base_dir: ${paths.scratch}/experiments/${shared.exp_name}/train
+base_dir: ${paths.scratch}/experiments/${shared.exp_name}/train_${device}
 hydra:
   run:
     dir: ${base_dir}/hydra
