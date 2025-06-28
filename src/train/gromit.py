@@ -43,6 +43,7 @@ class Gromit:
             and (self.wandb_entity is not None)
             and (self.wandb_project is not None)
         )
+        self.use_wandb = True
 
         self.train_loss = LossTracker()
         self.val_loss = LossTracker()

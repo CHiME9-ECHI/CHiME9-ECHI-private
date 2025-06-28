@@ -17,4 +17,5 @@ conda activate echi_recipe
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export PYTHONPATH='$PYTHONPATH:src'
 
-python3 run_train.py
+python3 run_train.py device=ha shared.exp_name=baseline_ha model.input.channels=4
+
