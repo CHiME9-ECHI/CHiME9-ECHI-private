@@ -15,7 +15,7 @@ class LossTracker:
         self.history = []
 
     def update(self, loss: torch.Tensor):
-        self.loss += loss
+        self.loss += loss.to(self.loss.device)
         self.steps += 1
 
     def get_average(self) -> float:

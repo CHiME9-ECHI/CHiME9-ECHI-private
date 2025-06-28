@@ -61,15 +61,16 @@ class ECHI(Dataset):
 
         self.preppers = {"noisy": noisy_prep, "target": ref_prep, "spkid": spk_prep}
 
+        self.debug = debug
+
         self.manifest: list[dict]
         self.make_manifest()
 
-        self.debug = debug
-        if self.debug:
-            self.manifest = self.manifest[:10]
 
     def make_manifest(self):
         self.manifest = []
+        
+        end = False        
 
         for meta in self.metadata:
 
@@ -94,6 +95,13 @@ class ECHI(Dataset):
                     )
 
                 self.manifest += self.get_segment_paths(meta["session"], pid, segments)
+
+                if self.debug and len(self.manifest) > 10:
+                    self.manifest = self.manifest[:10]
+                    end = True
+                    break
+            if end:
+                break
 
     def get_segment_paths(self, session, pid, segments) -> list[dict]:
 
