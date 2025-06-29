@@ -12,7 +12,7 @@ import torchaudio
 from tqdm import tqdm
 
 from shared.core_utils import get_session_tuples
-from inference import get_enhance_fn
+from inference.registry import enhancement_options
 
 
 def enhance_all_sessions(cfg):
@@ -21,7 +21,7 @@ def enhance_all_sessions(cfg):
     session_tuples = get_session_tuples(
         cfg.sessions_file, cfg.device, datasets=cfg.dataset
     )
-    enhance_fn, kwargs = get_enhance_fn(Path(cfg.base_dir).parent, cfg.device)
+    enhance_fn = enhancement_options[cfg.enhancement_name]
 
     for session, device, pid in tqdm(session_tuples):
         dataset = session.split("_")[0]
@@ -41,7 +41,7 @@ def enhance_all_sessions(cfg):
             noisy_fs=noisy_fs,
             spkid_audio=rainbow_audio,
             spkid_fs=rainbow_fs,
-            **kwargs,
+            target_fs=cfg.ref_sample_rate,
         )
 
         enhanced_fpath = Path(
@@ -62,7 +62,7 @@ def enhance_all_sessions(cfg):
             raise ValueError(f"Output has too many channels: {output.shape}")
 
         with open(enhanced_fpath, "wb") as file:
-            sf.write(file, output, cfg.sample_rate, subtype=cfg.bitdepth)
+            sf.write(file, output, cfg.ref_sample_rate, subtype=cfg.bitdepth)
 
 
 @hydra.main(version_base=None, config_path="../config", config_name="main")

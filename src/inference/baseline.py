@@ -1,11 +1,11 @@
 import torch
-from omegaconf import OmegaConf, DictConfig
+from omegaconf import OmegaConf
 import json
 from pathlib import Path
 from typing import Callable
 
 from shared.core_utils import get_model
-from shared.signal_utils import AudioPrep, STFTWrapper
+from shared.signal_utils import STFTWrapper
 from shared.CausalMCxTFGridNet import MCxTFGridNet
 
 
@@ -14,13 +14,11 @@ def enhance(
     noisy_fs: int,
     spkid_audio: torch.Tensor,
     spkid_fs: int,
-    noisy_prep: AudioPrep,
-    spkid_prep: AudioPrep,
     stft: STFTWrapper,
     model: MCxTFGridNet,
 ):
-    noisy_audio = noisy_prep.process(noisy_audio, noisy_fs)
-    spkid_audio = spkid_prep.process(spkid_audio, spkid_fs)
+    # noisy_audio = noisy_prep.process(noisy_audio, noisy_fs)
+    # spkid_audio = spkid_prep.process(spkid_audio, spkid_fs)
     spkid_stft = stft(spkid_audio)
 
     spkid_stft = spkid_stft.unsqueeze(0)
@@ -33,7 +31,7 @@ def enhance(
     window_time = 60
     overlap = 1 / 8
 
-    window_samples = window_time * noisy_prep.output_sr
+    window_samples = window_time * 16000
     window_samples -= (window_samples - stft.n_fft) % stft.hop_length
     overlap_samples = int(window_samples * overlap)
     stride = window_samples - overlap_samples
@@ -71,8 +69,9 @@ def get_process(exp_dir: Path, device: str) -> tuple[Callable, dict]:
     model, cfg = find_model(exp_dir, device)
 
     # Get kwargs
-    kwargs = load_kwargs(cfg.model)
-    kwargs["model"] = model
+    # kwargs = load_kwargs(cfg.model)
+    # kwargs["model"] = model
+    kwargs = {}
 
     return enhance, kwargs
 
@@ -94,22 +93,22 @@ def find_model(exp_dir: Path, device: str):
     return model, cfg
 
 
-def load_kwargs(model_cfg: DictConfig):
+# def load_kwargs(model_cfg: DictConfig):
 
-    noisy_prepper = AudioPrep(
-        output_channels=model_cfg.input.channels,
-        input_sr=48000,
-        output_sr=model_cfg.input.sample_rate,
-        output_rms=model_cfg.input.rms,
-        device="cpu",
-    )
-    spk_prepper = AudioPrep(
-        output_channels=1,
-        input_sr=48000,
-        output_sr=model_cfg.input.sample_rate,
-        output_rms=model_cfg.input.rms,
-        device="cpu",
-    )
-    stft = STFTWrapper(**model_cfg.input.stft)
+#     noisy_prepper = AudioPrep(
+#         output_channels=model_cfg.input.channels,
+#         input_sr=48000,
+#         output_sr=model_cfg.input.sample_rate,
+#         output_rms=model_cfg.input.rms,
+#         device="cpu",
+#     )
+#     spk_prepper = AudioPrep(
+#         output_channels=1,
+#         input_sr=48000,
+#         output_sr=model_cfg.input.sample_rate,
+#         output_rms=model_cfg.input.rms,
+#         device="cpu",
+#     )
+#     stft = STFTWrapper(**model_cfg.input.stft)
 
-    return {"noisy_prep": noisy_prepper, "spkid_prep": spk_prepper, "stft": stft}
+#     return {"noisy_prep": noisy_prepper, "spkid_prep": spk_prepper, "stft": stft}

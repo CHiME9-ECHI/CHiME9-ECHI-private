@@ -1,18 +1,6 @@
-from typing import Callable
-from pathlib import Path
+import importlib
+import pkgutil
 
-
-def get_enhance_fn(exp_dir: Path, device: str) -> tuple[Callable, dict]:
-
-    name = exp_dir.name
-
-    if name == "passthrough":
-        from inference.passthrough import process_session
-
-        return process_session, {"target_sr": 16000}
-    elif name == "baseline":
-        from inference.baseline import get_process
-
-        return get_process(exp_dir, device)
-
-    raise ValueError(f"Enhance option {name} not recognised. Add code here!")
+# Auto-import all modules in the enhancements package
+for _, module_name, _ in pkgutil.iter_modules(__path__):
+    importlib.import_module(f"{__name__}.{module_name}")

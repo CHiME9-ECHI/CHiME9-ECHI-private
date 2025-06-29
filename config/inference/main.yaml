@@ -8,10 +8,12 @@ defaults:
 
 # Experiment name
 exp_name: ${shared.exp_name}
+enhancement_name: ${exp_name}
 
 # Info for which signals to evaluate
 device: aria # Devices to process
 dataset: dev # Dataset to use for processing
+
 model_sample_rate: ${shared.model_sample_rate}
 ref_sample_rate: ${shared.ref_sample_rate}
 bitdepth: ${shared.signal_bitdepth}
