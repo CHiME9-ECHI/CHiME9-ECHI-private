@@ -2,113 +2,123 @@ import torch
 from omegaconf import OmegaConf
 import json
 from pathlib import Path
-from typing import Callable
+from typing import Dict
 
+from inference.registry import register_enhancement
 from shared.core_utils import get_model
-from shared.signal_utils import STFTWrapper
-from shared.CausalMCxTFGridNet import MCxTFGridNet
+from shared.signal_utils import STFTWrapper, prep_audio
 
 
-def enhance(
-    noisy_audio: torch.Tensor,
-    noisy_fs: int,
-    spkid_audio: torch.Tensor,
-    spkid_fs: int,
-    stft: STFTWrapper,
-    model: MCxTFGridNet,
-):
-    # noisy_audio = noisy_prep.process(noisy_audio, noisy_fs)
-    # spkid_audio = spkid_prep.process(spkid_audio, spkid_fs)
-    spkid_stft = stft(spkid_audio)
+@register_enhancement("baseline")
+class Baseline:
+    def __init__(
+        self,
+        inference_dir: str,
+        audio_device: str,
+        window_size: int,
+        stride: int,
+        torch_device: str,
+    ):
+        self.train_dir = Path(inference_dir).parent / f"train_{audio_device}"
 
-    spkid_stft = spkid_stft.unsqueeze(0)
-    spkid_lens = torch.tensor([spkid_stft.shape[2]])
+        self.train_cfg = self.get_train_config()
+        self.model_cfg = self.train_cfg.model
 
-    duration = noisy_audio.shape[-1]
+        self.stft = STFTWrapper(**self.model_cfg.input.stft, device=torch_device)
 
-    output = torch.zeros(duration)
+        ckpt_path = self.get_ckpt_path()
+        self.model = get_model(self.model_cfg, ckpt_path)
+        self.model = self.model.to(torch_device)
+        self.model.eval()
 
-    window_time = 60
-    overlap = 1 / 8
+        self.window_samples = window_size * self.model_cfg.input.sample_rate
+        rem = (self.window_samples - self.stft.n_fft) % self.stft.hop_length
+        if rem > 0:
+            self.window_samples += self.stft.hop_length - rem
 
-    window_samples = window_time * 16000
-    window_samples -= (window_samples - stft.n_fft) % stft.hop_length
-    overlap_samples = int(window_samples * overlap)
-    stride = window_samples - overlap_samples
+        self.stride_samples = stride * self.model_cfg.input.sample_rate
 
-    model.eval()
-    with torch.no_grad():
-        for start in range(0, noisy_audio.shape[-1], stride):
-            end = start + window_samples
-            if end > duration:
-                end = duration + 1
+        self.olap_samples = self.window_samples - self.stride_samples
+        if self.olap_samples < 0:
+            raise ValueError(
+                f"Stride must be smaller than window size! Window: {window_size}, stride: {stride}"
+            )
+        elif self.olap_samples > 0:
+            self.crossfade = torch.hann_window(self.olap_samples, device=torch_device)
 
-            snippet = noisy_audio[:, start:end]
-            snippet = stft(snippet)
-            snippet = snippet.unsqueeze(0)
+    def get_train_config(self):
+        return OmegaConf.load(self.train_dir / "hydra/.hydra/config.yaml")
 
-            den_snippet = model(snippet, spkid_stft, spkid_lens)
+    def get_ckpt_path(self):
+        with open(self.train_dir / "train_log.json", "r") as file:
+            train_log = json.load(file)
 
-            den_snippet = den_snippet.squeeze(0)
-            den_snippet = stft.inverse(den_snippet)
-            den_snippet = den_snippet.squeeze(0).squeeze(0)
+        best_epoch = min(train_log, key=lambda x: x["val_loss"])["epoch"]
+        ckpt_path = self.train_dir / f"checkpoints/epoch{str(best_epoch).zfill(3)}.pt"
 
-            if start > 0:
-                den_snippet[:overlap_samples] *= 0.5
-            if end != duration + 1:
-                den_snippet[-overlap_samples:] *= 0.5
+        return ckpt_path
 
-            output[start:end] += den_snippet
+    def process_session(
+        self,
+        device_audio: torch.Tensor,
+        device_fs: int,
+        spkid_audio: torch.Tensor,
+        spkid_fs: int,
+        kwargs: Dict | None = None,
+    ) -> torch.Tensor:
+        print(device_fs, self.model_cfg.input.sample_rate)
+        device_audio = prep_audio(
+            device_audio,
+            device_fs,
+            self.model_cfg.input.channels,
+            self.model_cfg.input.sample_rate,
+            self.model_cfg.input.rms,
+            batched=False,
+        )
+        spkid_audio = prep_audio(
+            spkid_audio.squeeze(0),
+            spkid_fs,
+            1,
+            self.model_cfg.input.sample_rate,
+            self.model_cfg.input.rms,
+            batched=False,
+        )
 
-    return output
+        spkid_input = self.stft(spkid_audio).unsqueeze(0)
+        spkid_lens = torch.tensor([spkid_input.shape[2]])
 
+        duration = device_audio.shape[-1]
 
-def get_process(exp_dir: Path, device: str) -> tuple[Callable, dict]:
+        output = torch.zeros(duration)
 
-    # Get model
-    model, cfg = find_model(exp_dir, device)
+        with torch.no_grad():
+            for start in range(0, duration, self.stride_samples):
 
-    # Get kwargs
-    # kwargs = load_kwargs(cfg.model)
-    # kwargs["model"] = model
-    kwargs = {}
+                end = min(start + self.window_samples, duration)
 
-    return enhance, kwargs
+                snippet = device_audio[..., start:end]
+                snippet = prep_audio(
+                    snippet,
+                    self.model_cfg.input.sample_rate,
+                    self.model_cfg.input.channels,
+                    self.model_cfg.input.sample_rate,
+                    self.model_cfg.input.rms,
+                    batched=False,
+                )
 
+                snippet = self.stft(snippet).unsqueeze(0)
 
-def find_model(exp_dir: Path, device: str):
+                den_snippet = self.model(snippet, spkid_input, spkid_lens).squeeze(0)
+                den_snippet = self.stft.inverse(den_snippet).squeeze(0).squeeze(0)
 
-    exp_dir = exp_dir / f"train_{device}"
+                if start > 0 and den_snippet.shape[-1] > self.olap_samples // 2:
+                    den_snippet[: self.olap_samples // 2] *= self.crossfade[
+                        : self.olap_samples // 2
+                    ]
 
-    with open(exp_dir / "train_log.json", "r") as file:
-        train_log = json.load(file)
-
-    cfg = OmegaConf.load(exp_dir / "hydra/.hydra/config.yaml")
-
-    best_log = min(train_log, key=lambda x: x["val_loss"])
-    best_epoch = best_log["epoch"]
-    ckpt_path = exp_dir / f"checkpoints/epoch{str(best_epoch).zfill(3)}.pt"
-
-    model = get_model(cfg.model, ckpt_path)
-    return model, cfg
-
-
-# def load_kwargs(model_cfg: DictConfig):
-
-#     noisy_prepper = AudioPrep(
-#         output_channels=model_cfg.input.channels,
-#         input_sr=48000,
-#         output_sr=model_cfg.input.sample_rate,
-#         output_rms=model_cfg.input.rms,
-#         device="cpu",
-#     )
-#     spk_prepper = AudioPrep(
-#         output_channels=1,
-#         input_sr=48000,
-#         output_sr=model_cfg.input.sample_rate,
-#         output_rms=model_cfg.input.rms,
-#         device="cpu",
-#     )
-#     stft = STFTWrapper(**model_cfg.input.stft)
-
-#     return {"noisy_prep": noisy_prepper, "spkid_prep": spk_prepper, "stft": stft}
+                if end < duration and den_snippet.shape[-1] > self.olap_samples // 2:
+                    den_snippet[-self.olap_samples // 2 :] *= self.crossfade[
+                        -self.olap_samples // 2 :
+                    ]
+                output[start:end] += den_snippet
+        return output

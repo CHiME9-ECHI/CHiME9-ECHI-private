@@ -11,18 +11,20 @@ import torch
 import torchaudio
 from tqdm import tqdm
 
-from shared.core_utils import get_session_tuples
+from shared.core_utils import get_session_tuples, get_device
 from inference.registry import enhancement_options
 
 
 def enhance_all_sessions(cfg):
     logging.info("Preparing the ECHI dataset")
 
+    torch_device = get_device()
+
     session_tuples = get_session_tuples(
         cfg.sessions_file, cfg.device, datasets=cfg.dataset
     )
     enhancement = enhancement_options[cfg.enhancement_name]
-    enhancement = enhancement(**cfg.enhance_args)
+    enhancement = enhancement(**cfg.enhance_args, torch_device=torch_device)
 
     for session, device, pid in tqdm(session_tuples):
         dataset = session.split("_")[0]
