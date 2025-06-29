@@ -7,13 +7,18 @@ import hydra
 from omegaconf import OmegaConf
 
 from scripts.inference.enhance import enhance_all_sessions
+from scripts.inference.resample import resample_all_sessions
 
 
 @hydra.main(version_base=None, config_path="config/inference", config_name="main")
 def main(cfg):
     logging.info(f"Hydra config:\n{OmegaConf.to_yaml(cfg, resolve=True)}")
 
-    enhance_all_sessions(cfg)
+    if cfg.resample.run:
+        resample_all_sessions(cfg.resample)
+
+    if cfg.enhance.run:
+        enhance_all_sessions(cfg.enhance)
 
 
 if __name__ == "__main__":

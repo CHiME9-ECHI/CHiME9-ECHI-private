@@ -3,6 +3,7 @@ from omegaconf import OmegaConf
 import json
 from pathlib import Path
 from typing import Dict
+from tqdm import tqdm
 
 from inference.registry import register_enhancement
 from shared.core_utils import get_model
@@ -66,7 +67,7 @@ class Baseline:
         spkid_fs: int,
         kwargs: Dict | None = None,
     ) -> torch.Tensor:
-        print(device_fs, self.model_cfg.input.sample_rate)
+
         device_audio = prep_audio(
             device_audio,
             device_fs,
@@ -92,7 +93,7 @@ class Baseline:
         output = torch.zeros(duration)
 
         with torch.no_grad():
-            for start in range(0, duration, self.stride_samples):
+            for start in tqdm(range(0, duration, self.stride_samples)):
 
                 end = min(start + self.window_samples, duration)
 

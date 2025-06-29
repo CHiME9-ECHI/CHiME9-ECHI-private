@@ -6,6 +6,7 @@ import hydra
 import numpy as np
 from omegaconf import DictConfig
 from pathlib import Path
+import soxr
 import soundfile as sf
 import torch
 import torchaudio
@@ -23,8 +24,8 @@ def enhance_all_sessions(cfg):
     session_tuples = get_session_tuples(
         cfg.sessions_file, cfg.device, datasets=cfg.dataset
     )
-    enhancement = enhancement_options[cfg.enhancement_name]
-    enhancement = enhancement(**cfg.enhance_args, torch_device=torch_device)
+    enhancement = enhancement_options[cfg.name]
+    enhancement = enhancement(**cfg.args, torch_device=torch_device)
 
     for session, device, pid in tqdm(session_tuples):
         dataset = session.split("_")[0]
@@ -62,6 +63,9 @@ def enhance_all_sessions(cfg):
 
         if output.ndim > 1:
             raise ValueError(f"Output has too many channels: {output.shape}")
+
+        if cfg.model_sample_rate != cfg.ref_sample_rate:
+            output = soxr.resample(output, cfg.model_sample_rate, cfg.ref_sample_rate)
 
         with open(enhanced_fpath, "wb") as file:
             sf.write(file, output, cfg.ref_sample_rate, subtype=cfg.bitdepth)
