@@ -4,6 +4,7 @@
 defaults:
   - .@paths: ../paths
   - .@shared: ../shared
+  - enhance_args: ../baseline
   - _self_
 
 # Experiment name

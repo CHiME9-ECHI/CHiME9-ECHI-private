@@ -22,7 +22,7 @@ def enhance_all_sessions(cfg):
         cfg.sessions_file, cfg.device, datasets=cfg.dataset
     )
     enhancement = enhancement_options[cfg.enhancement_name]
-    enhancement = enhancement.__init__(16000)
+    enhancement = enhancement(**cfg.enhance_args)
 
     for session, device, pid in tqdm(session_tuples):
         dataset = session.split("_")[0]
