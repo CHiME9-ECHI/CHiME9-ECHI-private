@@ -26,6 +26,7 @@ class Baseline:
         self.model_cfg = self.train_cfg.model
 
         self.stft = STFTWrapper(**self.model_cfg.input.stft, device=torch_device)
+        self.stft = self.stft.to(torch_device)
 
         ckpt_path = self.get_ckpt_path()
         self.model = get_model(self.model_cfg, ckpt_path)
@@ -90,7 +91,7 @@ class Baseline:
 
         duration = device_audio.shape[-1]
 
-        output = torch.zeros(duration)
+        output = torch.zeros(duration, device=device_audio.device)
 
         with torch.no_grad():
             for start in tqdm(range(0, duration, self.stride_samples)):
