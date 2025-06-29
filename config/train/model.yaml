@@ -1,7 +1,7 @@
 name: baseline
 
 input:
-  sample_rate: 16000
+  sample_rate: ${model_sample_rate}
   channels: ${audio_channels}
   rms: 0.05
   use_spkid: true

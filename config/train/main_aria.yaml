@@ -14,7 +14,7 @@ defaults:
 # Signal info
 device: aria
 audio_channels: 7
-sample_rate: 16000
+sample_rate: ${shared.model_sample_rate}
 
 # Debug run
 debug: false
