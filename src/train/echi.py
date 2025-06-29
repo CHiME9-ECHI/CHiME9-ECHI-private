@@ -8,6 +8,7 @@ import torchaudio
 from pathlib import Path
 from torch.utils.data import Dataset
 import csv
+from tqdm import tqdm
 
 from shared.signal_utils import AudioPrep, combine_audio_list
 
@@ -72,7 +73,7 @@ class ECHI(Dataset):
         
         end = False        
 
-        for meta in self.metadata:
+        for meta in tqdm(self.metadata):
 
             try:
                 device_pos = int(meta[f"{self.audio_device}_pos"])
@@ -124,9 +125,7 @@ class ECHI(Dataset):
 
                 seg_fpaths[audio_type] = this_fpath
             if all_good:
-
-                with sf.SoundFile(seg_fpaths["noisy"]) as f:
-                    length = f.frames / f.samplerate
+                length = (int(seg["end"]) - int(seg["start"])) / 16000
                 if length < 1:
                     continue
 
