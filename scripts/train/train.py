@@ -15,12 +15,7 @@ torch.manual_seed(666)
 
 
 def get_dataset(
-    split: str,
-    data_cfg: DictConfig,
-    debug: bool,
-    noisy_prepper: AudioPrep,
-    ref_prepper: AudioPrep,
-    spk_prepper: AudioPrep,
+    split: str, data_cfg: DictConfig, debug: bool, input_prepper: AudioPrep
 ):
     data = ECHI(
         split,
@@ -31,9 +26,7 @@ def get_dataset(
         data_cfg.sessions_file,
         data_cfg.segments_file,
         debug,
-        noisy_prepper,
-        ref_prepper,
-        spk_prepper,
+        input_prepper,
     )
     data_len = len(data)
     samples = [data.__getitem__(i * data_len // 5)["id"] for i in range(1, 4)]
@@ -142,39 +135,17 @@ def run(
     else:
         do_stft = False
 
-    use_spkid = model_cfg.input.use_spkid
-    if use_spkid is None:
-        use_spkid = False
-
-    noisy_prepper = AudioPrep(
+    input_prepper = AudioPrep(
         output_channels=model_cfg.input.channels,
-        input_sr=48000,
-        output_sr=model_cfg.input.sample_rate,
-        output_rms=model_cfg.input.rms,
-        device="cpu",
-    )
-    ref_prepper = AudioPrep(
-        output_channels=1,
-        input_sr=16000,
-        output_sr=model_cfg.input.sample_rate,
-        output_rms=model_cfg.input.rms,
-        device="cpu",
-    )
-    spk_prepper = AudioPrep(
-        output_channels=1,
-        input_sr=48000,
+        input_sr=model_cfg.input.sample_rate,
         output_sr=model_cfg.input.sample_rate,
         output_rms=model_cfg.input.rms,
         device="cpu",
     )
 
-    trainset, trainsaves = get_dataset(
-        "train", data_cfg, debug, noisy_prepper, ref_prepper, spk_prepper
-    )
+    trainset, trainsaves = get_dataset("train", data_cfg, debug, input_prepper)
 
-    devset, devsaves = get_dataset(
-        "dev", data_cfg, debug, noisy_prepper, ref_prepper, spk_prepper
-    )
+    devset, devsaves = get_dataset("dev", data_cfg, debug, input_prepper)
 
     model = get_model(model_cfg, None)
     optimizer = torch.optim.Adam(model.parameters(), lr=train_cfg.lr)

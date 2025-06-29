@@ -3,12 +3,10 @@ if __name__ == "__main__":
 
     sys.path.append("src")
 
-import soundfile as sf
 import torchaudio
 from pathlib import Path
 from torch.utils.data import Dataset
 import csv
-from tqdm import tqdm
 
 from shared.signal_utils import AudioPrep, combine_audio_list
 
@@ -39,9 +37,7 @@ class ECHI(Dataset):
         sessions_file: str,
         segments_file: str,
         debug: bool,
-        noisy_prep: AudioPrep,
-        ref_prep: AudioPrep,
-        spk_prep: AudioPrep,
+        input_prepper: AudioPrep,
     ):
         super().__init__()
         self.subset = subset
@@ -60,20 +56,20 @@ class ECHI(Dataset):
 
         self.segment_samples = 16000 * 4
 
-        self.preppers = {"noisy": noisy_prep, "target": ref_prep, "spkid": spk_prep}
+        self.prepper = input_prepper
+        self.noisy_channels = input_prepper.output_channels
 
         self.debug = debug
 
         self.manifest: list[dict]
         self.make_manifest()
 
-
     def make_manifest(self):
         self.manifest = []
-        
-        end = False        
 
-        for meta in tqdm(self.metadata):
+        end = False
+
+        for meta in self.metadata:
 
             try:
                 device_pos = int(meta[f"{self.audio_device}_pos"])
@@ -141,8 +137,13 @@ class ECHI(Dataset):
 
         for audio_type in self.signal_paths.keys():
             audio, fs = torchaudio.load(str(meta[audio_type]))
-            prep = self.preppers[audio_type]  # type: AudioPrep
-            audio = prep.process(audio, fs)
+
+            if audio_type == "noisy":
+                self.prepper.output_channels = self.noisy_channels
+            else:
+                self.prepper.output_channels = 1
+
+            audio = self.prepper.process(audio, fs)
 
             if audio.shape[-1] > self.segment_samples and audio_type != "spk":
                 # Cut segments short to avoid memory issues
@@ -150,6 +151,7 @@ class ECHI(Dataset):
 
             out[audio_type] = audio
 
+        self.prepper.output_channels = self.noisy_channels
         return out
 
     def __len__(self):
