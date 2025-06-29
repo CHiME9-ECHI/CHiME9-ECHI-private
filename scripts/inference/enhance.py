@@ -21,7 +21,8 @@ def enhance_all_sessions(cfg):
     session_tuples = get_session_tuples(
         cfg.sessions_file, cfg.device, datasets=cfg.dataset
     )
-    enhance_fn = enhancement_options[cfg.enhancement_name]
+    enhancement = enhancement_options[cfg.enhancement_name]
+    enhancement = enhancement.__init__(16000)
 
     for session, device, pid in tqdm(session_tuples):
         dataset = session.split("_")[0]
@@ -36,12 +37,11 @@ def enhance_all_sessions(cfg):
         noisy_audio, noisy_fs = torchaudio.load(noisy_fpath)
         rainbow_audio, rainbow_fs = torchaudio.load(rainbow_fpath)
 
-        output = enhance_fn(
-            noisy_audio=noisy_audio,
-            noisy_fs=noisy_fs,
+        output = enhancement.process_session(
+            device_audio=noisy_audio,
+            device_fs=noisy_fs,
             spkid_audio=rainbow_audio,
             spkid_fs=rainbow_fs,
-            target_fs=cfg.ref_sample_rate,
         )
 
         enhanced_fpath = Path(

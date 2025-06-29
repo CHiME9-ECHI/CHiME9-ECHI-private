@@ -1,11 +1,25 @@
-from typing import Callable, Dict
+from typing import Dict, Protocol, Optional, Any
+import torch
 
-enhancement_options: Dict[str, Callable] = {}
+
+class Enhancement(Protocol):
+    def process_session(
+        self,
+        device_audio: torch.Tensor,
+        device_fs: int,
+        spkid_audio: torch.Tensor,
+        spkid_fs: int,
+        kwargs: Optional[Dict] = None,
+    ) -> torch.Tensor: ...
+
+
+enhancement_options: Dict[str, Enhancement] = {}
 
 
 def register_enhancement(name: str):
-    def decorator(func: Callable):
-        enhancement_options[name] = func
-        return func
+
+    def decorator(enhance: Any):
+        enhancement_options[name] = enhance
+        return enhance
 
     return decorator
