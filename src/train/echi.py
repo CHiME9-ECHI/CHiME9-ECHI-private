@@ -1,21 +1,16 @@
-if __name__ == "__main__":
-    import sys
-
-    sys.path.append("src")
-
 import torchaudio
 from pathlib import Path
 from torch.utils.data import Dataset
 import csv
 
-from shared.signal_utils import AudioPrep, combine_audio_list
+from shared.signal_utils import combine_audio_list
 
 
 from typing import Any
 
 
 def collate_fn(batch: list[dict[str, Any]]):
-    new_out: dict[str, Any] = {"id": [x["id"] for x in batch]}
+    new_out: dict[str, Any] = {"id": [x["id"] for x in batch], "fs": batch[0]["fs"]}
 
     for audio_type in ["noisy", "target", "spkid"]:
         audio = [x[audio_type] for x in batch]
@@ -37,7 +32,6 @@ class ECHI(Dataset):
         sessions_file: str,
         segments_file: str,
         debug: bool,
-        input_prepper: AudioPrep,
     ):
         super().__init__()
         self.subset = subset
@@ -55,9 +49,6 @@ class ECHI(Dataset):
         }
 
         self.segment_samples = 16000 * 4
-
-        self.prepper = input_prepper
-        self.noisy_channels = input_prepper.output_channels
 
         self.debug = debug
 
@@ -135,23 +126,22 @@ class ECHI(Dataset):
 
         out = {"id": meta["id"]}
 
-        for audio_type in self.signal_paths.keys():
-            audio, fs = torchaudio.load(str(meta[audio_type]))
+        noisy, nfs = torchaudio.load(str(meta["noisy"]))
+        target, tfs = torchaudio.load(str(meta["target"]))
+        spkid, sfs = torchaudio.load(str(meta["spkid"]))
 
-            if audio_type == "noisy":
-                self.prepper.output_channels = self.noisy_channels
-            else:
-                self.prepper.output_channels = 1
+        assert nfs == tfs, f"Noisy fs ({nfs}Hz) doesn't match Target fs ({tfs}Hz)"
+        assert nfs == sfs, f"Noisy fs ({nfs}Hz) doesn't match SpkID fs ({sfs}Hz)"
 
-            audio = self.prepper.process(audio, fs)
+        if noisy.shape[-1] > self.segment_samples:
+            noisy = noisy[..., : self.segment_samples]
+            target = target[..., : self.segment_samples]
 
-            if audio.shape[-1] > self.segment_samples and audio_type != "spk":
-                # Cut segments short to avoid memory issues
-                audio = audio[..., : self.segment_samples]
+        out["noisy"] = noisy
+        out["target"] = target.squeeze(0)
+        out["spkid"] = spkid.squeeze(0)
+        out["fs"] = nfs
 
-            out[audio_type] = audio
-
-        self.prepper.output_channels = self.noisy_channels
         return out
 
     def __len__(self):
