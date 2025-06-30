@@ -3,8 +3,8 @@ import pkgutil
 import os
 
 # Import default packages
-from inference import baseline as baseline
-from inference import passthrough as passthrough
+from enhancement import baseline as baseline
+from enhancement import passthrough as passthrough
 
 # Auto import enhancment options from ECHIPLUGINS
 if "ECHIPLUGINS" in os.environ:

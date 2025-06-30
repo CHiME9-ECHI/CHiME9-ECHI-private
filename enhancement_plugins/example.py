@@ -2,7 +2,7 @@ from typing import Dict
 import torch
 import soxr
 
-from inference.registry import register_enhancement, Enhancement
+from enhancement.registry import register_enhancement, Enhancement
 
 
 @register_enhancement("example")

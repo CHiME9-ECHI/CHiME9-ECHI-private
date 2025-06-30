@@ -13,7 +13,7 @@ import torchaudio
 from tqdm import tqdm
 
 from shared.core_utils import get_session_tuples, get_device
-from inference.registry import enhancement_options
+from enhancement.registry import enhancement_options
 
 
 def enhance_all_sessions(cfg, enhance_args):
@@ -39,9 +39,6 @@ def enhance_all_sessions(cfg, enhance_args):
 
         noisy_audio, noisy_fs = torchaudio.load(noisy_fpath)
         rainbow_audio, rainbow_fs = torchaudio.load(rainbow_fpath)
-
-        noisy_audio = noisy_audio.to(torch_device)
-        rainbow_audio = rainbow_audio.to(torch_device)
 
         output = enhancement.process_session(
             device_audio=noisy_audio,
