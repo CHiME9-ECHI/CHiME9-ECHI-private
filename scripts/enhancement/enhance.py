@@ -40,6 +40,9 @@ def enhance_all_sessions(cfg, enhance_args):
         noisy_audio, noisy_fs = torchaudio.load(noisy_fpath)
         rainbow_audio, rainbow_fs = torchaudio.load(rainbow_fpath)
 
+        noisy_audio = noisy_audio.to(torch_device)
+        rainbow_audio = rainbow_audio.to(torch_device)
+
         output = enhancement.process_session(
             device_audio=noisy_audio,
             device_fs=noisy_fs,

@@ -9,3 +9,4 @@ enhanced_signal: ${..paths.enhanced_signal}
 
 model_sample_rate: ${..shared.model_sample_rate}
 ref_sample_rate: ${..shared.ref_sample_rate}
+bitdepth: ${..shared.signal_bitdepth}
