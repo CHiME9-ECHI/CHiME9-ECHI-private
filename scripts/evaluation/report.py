@@ -13,6 +13,9 @@ from omegaconf import DictConfig
 
 from evaluation.segment_signals import get_session_tuples
 
+EARLIEST_START = 30 * 16000  # 30 seconds in sample
+NON_NUMERIC_KEYS = {"key", "srmr"}
+
 
 def read_jsonl(file_path, data=None):
     """Read a JSONL file and return a list of dictionaries."""
@@ -24,17 +27,13 @@ def read_jsonl(file_path, data=None):
     return data
 
 
-NON_NUMERIC_KEYS = {"key", "srmr"}
-
-
-def name_to_duration(name):
-    """Convert a name to a duration in seconds.
+def parse_name(name):
+    """Parse name to extract start and end time stamps in samples.
 
     Segment names have the format: dev_05.aria.P123.092.13174243_13314467.wav
     where the last part is the start and end time stamps in samples
     """
-    time_stamps = name.split(".")[-2].split("_")
-    return int(time_stamps[1]) - int(time_stamps[0])
+    return name.split(".")[-2].split("_")
 
 
 def compute_stats(results):
@@ -43,7 +42,7 @@ def compute_stats(results):
     valid_keys = [k for k in results[0] if k not in NON_NUMERIC_KEYS]
 
     for key in valid_keys:
-        durations = [name_to_duration(result["key"]) for result in results]
+        durations = [result["duration"] for result in results]
         data = [float(result[key]) for result in results if key in result]
         weighted_mean = np.average(data, weights=durations) if data else np.nan
         mean_value = np.mean(data) if data else np.nan
@@ -83,14 +82,26 @@ def save_results(results, results_file, ext=None):
             writer.writerow(result)
 
 
-def clean_results(raw_results):
-    """Remove any incomplete results"""
+def preprocess_results(raw_results):
+    """Preprocess results.DictConfig
+    - Remove empty segments
+    - Remove segments that start before the end of the 30 second intro
+    - Add duration and start time fields
+    """
     results = []
     for result in raw_results:
         if len(result.keys()) == 1:
             logging.warning(f"Segment {result['key']} how no results")
             continue
         results.append(result)
+
+    for result in results:
+        start_time, end_time = parse_name(result["key"])
+        result["duration"] = int(end_time) - int(start_time)
+        result["start_time"] = int(start_time)
+
+    results = [result for result in results if result["start_time"] >= EARLIEST_START]
+
     return results
 
 
@@ -121,7 +132,7 @@ def report(cfg):
             results = read_jsonl(results_file, results)
         logging.info(f"Total results for {device}: {len(results)}")
 
-        results = clean_results(results)
+        results = preprocess_results(results)
 
         stats = compute_stats(results)
         stats_file = cfg.report_file.format(
