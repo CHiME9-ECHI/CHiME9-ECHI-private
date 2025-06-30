@@ -6,11 +6,11 @@ import logging
 import hydra
 from omegaconf import OmegaConf
 
-from scripts.inference.enhance import enhance_all_sessions
-from scripts.inference.resample import resample_all_sessions
+from scripts.enhancement.enhance import enhance_all_sessions
+from scripts.enhancement.resample import resample_all_sessions
 
 
-@hydra.main(version_base=None, config_path="config/inference", config_name="main")
+@hydra.main(version_base=None, config_path="config/enhancement", config_name="main")
 def main(cfg):
     logging.info(f"Hydra config:\n{OmegaConf.to_yaml(cfg, resolve=True)}")
 
