@@ -27,18 +27,31 @@ def read_jsonl(file_path, data=None):
 NON_NUMERIC_KEYS = {"key", "srmr"}
 
 
+def name_to_duration(name):
+    """Convert a name to a duration in seconds.
+
+    Segment names have the format: dev_05.aria.P123.092.13174243_13314467.wav
+    where the last part is the start and end time stamps in samples
+    """
+    time_stamps = name.split(".")[-2].split("_")
+    return int(time_stamps[1]) - int(time_stamps[0])
+
+
 def compute_stats(results):
     """Compute statistics from the results."""
     stats = dict()
     valid_keys = [k for k in results[0] if k not in NON_NUMERIC_KEYS]
 
     for key in valid_keys:
+        durations = [name_to_duration(result["key"]) for result in results]
         data = [float(result[key]) for result in results if key in result]
-        mean_value = np.mean(data) if data else 0
-        std_value = np.std(data) if len(data) > 1 else 0
+        weighted_mean = np.average(data, weights=durations) if data else np.nan
+        mean_value = np.mean(data) if data else np.nan
+        std_value = np.std(data) if len(data) > 1 else np.nan
         min_value = np.min(data) if data else np.nan
         max_value = np.max(data) if data else np.nan
         stats[key] = {
+            "weighted_mean": weighted_mean,
             "mean": mean_value,
             "std": std_value,
             "std_err": std_value / np.sqrt(len(data)) if len(data) > 1 else np.nan,
