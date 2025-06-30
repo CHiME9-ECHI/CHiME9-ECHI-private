@@ -10,7 +10,7 @@ from shared.core_utils import get_model
 from shared.signal_utils import STFTWrapper, prep_audio
 
 
-@register_enhancement("baseline")
+@register_enhancement("plugin")
 class Baseline:
     def __init__(
         self,

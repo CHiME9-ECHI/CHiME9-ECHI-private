@@ -40,6 +40,6 @@ hydra:
 # This can be also done from command-line when running the script, e.g.
 # python run.py setup.run=false
 resample:
-  run: true
+  run: false
 enhance:
   run: true

@@ -24,6 +24,8 @@ def enhance_all_sessions(cfg):
     session_tuples = get_session_tuples(
         cfg.sessions_file, cfg.device, datasets=cfg.dataset
     )
+    print(enhancement_options)
+    return
     enhancement = enhancement_options[cfg.name]
     enhancement = enhancement(**cfg.args, torch_device=torch_device)
 
