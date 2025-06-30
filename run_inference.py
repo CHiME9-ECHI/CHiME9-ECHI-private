@@ -18,7 +18,7 @@ def main(cfg):
         resample_all_sessions(cfg.resample)
 
     if cfg.enhance.run:
-        enhance_all_sessions(cfg.enhance)
+        enhance_all_sessions(cfg.enhance, cfg.enhance_args)
 
 
 if __name__ == "__main__":

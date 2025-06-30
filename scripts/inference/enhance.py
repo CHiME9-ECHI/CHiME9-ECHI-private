@@ -16,7 +16,7 @@ from shared.core_utils import get_session_tuples, get_device
 from inference.registry import enhancement_options
 
 
-def enhance_all_sessions(cfg):
+def enhance_all_sessions(cfg, enhance_args):
     logging.info("Preparing the ECHI dataset")
 
     torch_device = get_device()
@@ -24,10 +24,8 @@ def enhance_all_sessions(cfg):
     session_tuples = get_session_tuples(
         cfg.sessions_file, cfg.device, datasets=cfg.dataset
     )
-    print(enhancement_options)
-    return
-    enhancement = enhancement_options[cfg.name]
-    enhancement = enhancement(**cfg.args, torch_device=torch_device)
+    enhancement = enhancement_options[enhance_args.name]
+    enhancement = enhancement(**enhance_args.args, torch_device=torch_device)
 
     for session, device, pid in tqdm(session_tuples):
         dataset = session.split("_")[0]

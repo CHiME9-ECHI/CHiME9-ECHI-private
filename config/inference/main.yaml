@@ -5,12 +5,13 @@ defaults:
   - .@paths: ../paths
   - .@shared: ../shared
   - .@resample: resample
-  - enhance: ../baseline
+  - .@enhance: enhance
+  - enhance_args: baseline
   - _self_
 
 # Experiment name
 exp_name: ${shared.exp_name}
-enhancement_name: ${enhance.name}
+enhancement_name: ${enhance_args.name}
 
 # Info for which signals to evaluate
 device: aria # Devices to process
