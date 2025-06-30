@@ -133,7 +133,7 @@ def validate(cfg):
 
 
 @hydra.main(
-    version_base=None, config_path=".../../config/evaluation", config_name="main"
+    version_base=None, config_path="../../config/evaluation", config_name="main"
 )
 def main(cfg: DictConfig) -> None:
     if not validate(cfg.validate):

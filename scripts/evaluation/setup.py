@@ -25,7 +25,7 @@ def setup(cfg):
 
 
 @hydra.main(
-    version_base=None, config_path=".../../config/evaluation", config_name="main_eval"
+    version_base=None, config_path="../../config/evaluation", config_name="main_eval"
 )
 def main(cfg: DictConfig) -> None:
     setup(cfg.setup)
