@@ -37,7 +37,7 @@ in turn, is presented as a dictionary storing the `mean`, `standard deviation`,
 For each `json` file there will also be a similarly named `csv` file containing
 the metric data on which the statistics were computed.
 
-## <a id="configuration">4. Configuring the baseline</a>
+## Configuring the baseline
 
 The system uses [Hydra](https://hydra.cc/) for configuration management.
  This allows for a flexible and hierarchical way to manage settings.

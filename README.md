@@ -4,7 +4,7 @@
 
 1. <a href="#install">Installing the software</a>
 2. <a href="#data">Installing the dataset</a>
-3. <a href="#stages"> Running the baseline</a>
+3. <a href="#stages">Stages</a>
 4. <a href="#troubleshooting">Troubleshooting</a>
 
 ## <a id="#install">1. Installing the software</a>
