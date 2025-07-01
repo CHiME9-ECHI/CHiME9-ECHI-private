@@ -17,7 +17,7 @@ This will unpack the data downloaded and then use them to trian a model.
 
 ## Unpack
 
-With your downloaded dataset, stored in `paths.echi_dir`, you can specify
+With your downloaded dataset, stored in `data/chime9_echi`, you can specify
 `model_sample_rate`, which is the sample rate input for your model, and a
 `device` (`ha` or `aria`), this script will
 

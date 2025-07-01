@@ -1,6 +1,6 @@
 # Evaluation
 
-The evaluation stage can be run on a given set of signals can be run with the
+The evaluation stage can be run on a given set of signals with the
 command
 
 ```bash

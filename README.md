@@ -18,11 +18,8 @@ cd CHiME9-ECHI
 
 The installation of the necessary tools is detailed in `install.sh`.
 We recommend to follow it step-by-step and adjust for your system if needed.
-The script will build a conda environment called `echi_recipe`
-
-```bash
-install.sh
-```
+The script will build a conda environment called `echi_recipe` and install the
+dependencies listed in `enivornment.yaml`.
 
 When running the system, remember to activate the conda environment and set the
 necessary environment variables,
@@ -69,6 +66,9 @@ The baseline system expects the dataset to be placed in the `data/chime9_echi`
  choose to place the data in a different location, you will need to update
  `config/paths.yaml` accordingly. However, adhering to the default directory
  structure (`data/chime9_echi`) is recommended for ease of use.
+
+Note that `data/chime9_echi` can also be a symbolic link to another location,
+allowing flexibility in where the dataset is physically stored.
 
 ## <a id="stages">3. Stages</a>
 
@@ -124,3 +124,6 @@ If you encounter issues, here are some common troubleshooting steps:
 - **Common Python Issues:** Check for common Python package installation problems
  or version conflicts within the Conda environment. Sometimes, reinstalling a
  problematic package can help.
+- **Other Issues:** If you have any other problems with this repository that
+cannot be fixed, please raise a GitHub Issue and we will do our best to resolve
+it for you.
