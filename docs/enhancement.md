@@ -20,7 +20,7 @@ for any enhancement systems which use the same sample rate.
 ## Enhance
 
 The enhance stage loads in the resampled 36 minute wav files from above, and
-puts these through a provided enhancement system. By default, this script can
+puts them through a provided enhancement system. By default, this script can
 run passthrough, which returns the first channel of audio, and the baseline
 system processing. We have included the option for writing a plugin for this
 script where you can define a custom enhancement function based on your system.
@@ -28,8 +28,9 @@ script where you can define a custom enhancement function based on your system.
 ## Enhancement Plugins
 
 An enhancement plugin is a Python class which should process a the full audio
-from a session. It can process the audio in chunks, but the output should be
-the full audio from a session.
+from a session. The core functionality of the class is the function `process_session`,
+which takes a full session of audio and the participant speaker id audio in,
+and produces a full session of that person's speech out.
 
 To use a custom enhancement plugin, you must first set the environment variable
 for where to find the plugins:
@@ -76,9 +77,9 @@ There are a few key points for using the plugin:
 
 - **Registry:** You must import `register_enhancement` and add the decorator to
 your class. The name ("example" above) is how you access the plugin, as
-specified by `config.enhancement.main.enhancement_name`
+specified by `config/enhancement/main.enhancement_name`
 - **Init params:** The parameters used to initialise the class should be stored
-in `config.enhancement.enhance_args.<your-algorithm-name>.yaml`
+in `config/enhancement/enhance_args/<your-algorithm-name>.yaml`
 - **Process session:** Each class must have a `process_session` function, which
 take the audio for a full session and the participant speech audio as input,
 and outputs the enhanced audio for the full session.
@@ -86,5 +87,5 @@ and outputs the enhanced audio for the full session.
 Once you have defined this, you can then run the enhancement stages using
 
 ```bash
-python run_enhancement.py enhancement_name=<your-algorithm-name>
+python run_enhancement.py enhancement_name=<your-algorithm-name> enhance_args=<your-algorithm-name>
 ```

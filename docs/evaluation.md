@@ -1,6 +1,7 @@
 # Evaluation
 
-The baseline system can be run using
+The evaluation stage can be run on a given set of signals can be run with the
+command
 
 ```bash
 python run_evaluation.py
@@ -39,11 +40,9 @@ the metric data on which the statistics were computed.
 
 ## Configuring the baseline
 
-The main configuration files are located in the `config` directory:
+The main configuration files are located in the `config/evaluation` directory:
 
 - `main.yaml`: Main configuration, imports other specific configurations.
-- `shared.yaml`: Shared parameters used across different scripts (e.g., dataset paths,
-general settings).
 - `setup.yaml`: Configuration for the data setup stage
 (`scripts/evaluation/setup.py`).
 - `enhance.yaml`: Configuration for the enhancement stage
@@ -57,7 +56,13 @@ general settings).
 - `report.yaml`: Configuration for the reporting stage
 (`scripts/evaluation/report.py`).
 - `metrics.yaml`: Configuration for the metrics used in evaluation.
+
+This phase also relies on configurations which persist across all stages,
+stored in the `config` directory.
+
 - `paths.yaml`: Defines paths for data, models, and outputs.
+- `shared.yaml`: Shared parameters used across different scripts (e.g., dataset paths,
+general settings).
 
 You can override any configuration parameter from the command line.
 
@@ -66,17 +71,17 @@ For `run_evaluation.py`, which executes the entire pipeline:
 ```bash
 # Example: Run with a specific dataset configuration and disable GPU usage
 # for enhancement
-python run.py dataset=dev enhance.use_gpu=false
+python run_evaluation.py dataset=dev enhance.use_gpu=false
 ```
 
 For individual scripts like `scripts/evaluate.py`:
 
 ```bash
 # Example: Evaluate a specific submission directory
-python scripts/evaluate.py evaluate.submission=<submission_dir>
+python scripts/evaluate.py evaluate.enhanced_dir=<submission_dir>
 
 # Example: Evaluate with specific test data
-python scripts/evaluate.py evaluate.submission=data/submission
+python scripts/evaluate.py evaluate.enhanced_dir=data/submission
 ```
 
 Key configurable parameters include:
@@ -98,14 +103,14 @@ plugin.
 For running on a local machine with multiple cores,
 
 ```bash
-python run.py evaluate.n_batches=10 evaluate.batch='range(1,11)' \
+python run_evaluation.py evaluate.n_batches=10 evaluate.batch='range(1,11)' \
  hydra/launcher=echi_submitit_local  --multirun
 ```
 
 For running on an HPC facility with a Slurm scheduler
 
 ```bash
-python run.py evaluate.n_batches=200 evaluate.batch='range(1,201)' \
+python run_evaluation.py evaluate.n_batches=200 evaluate.batch='range(1,201)' \
  hydra/launcher=echi_submitit_slurm  --multirun
 ```
 
@@ -125,4 +130,4 @@ python run.py evaluate.n_batches=200 evaluate.batch='range(1,201)' \
  example from 1 to 10, you would use `evaluate.batch='range(1,11)'`.
 
 If using an HPC facilty and Slurm, please check the configuration file
- `config/hydra/launcher/echi_submitit_slurm.yaml` and edit to fit your system
+ `config/hydra/launcher/echi_submitit_slurm.yaml` and edit to fit your system.
