@@ -2,7 +2,13 @@
 
 ### Enhancing Conversation to address Hearing Impairment
 
-This repository contains the baseline system for the CHiME-9 challenge, Task 2 ECHI. For detailed information on how to participate in the challenge and for obtaining the datasets, please refer to the [challenge website](https://www.chimechallenge.org/current/task2/index)
+This repository contains the baseline system for the CHiME-9 challenge, Task 2 ECHI.
+
+> **Quick start?** See: [Getting Started](#getting-started)
+
+For detailed information on how to participate in the challenge and for obtaining the datasets, please refer to the [challenge website](https://www.chimechallenge.org/current/task2/index)
+
+---
 
 ## About the Challenge
 
@@ -12,28 +18,31 @@ This repository contains the baseline system for the CHiME-9 challenge, Task 2 E
 
 ### Key Challenge Features
 
-- **Natural conversation** each of over 30 minutes with up to four persons; 49 sessions and 196 accent-diverse speakers.
-- **High degree of overlap** both within the conversation and with distractor talkers.
-- **Noisy background** simulating cafeteria-like environments with varying loudness.
-- **Hearing aid audio** with 4-channel input worn by a participant; **Aria glasses audio** with 7-channel input.
-- **Headtracking** for all conversation participants.
+- **Natural conversation** each of over 30 minutes with up to four persons
+- **49 sessions** and **196 accent-diverse speakers**
+- **High overlap** both in-conversation and with distractor talkers.
+- **Noisy background** simulating varying-loudness cafeterias
+- **Moving multi-microphone input**, from 4-channel hearing aids and 7-channel Aria glasses
+- **Headtracking** for all participants.
 
 ### Evaluation Metrics
 
-Systems are evaluated on a suite of metrics and listening tests,
+Systems are evaluated using:
 
-1. **Reference based** - For estimating both quality and intelligibility
-2. **Reference free** - DNN-based intelligibility and quality metric predictors
-3. **Listening tests** - Submitted systems will be subject to speech quality and intelligibility listing tests.
+1. **Reference-based**: Quality and intelligibility estimation
+2. **Reference-free**: DNN-based metric predictors
+3. **Listening tests**: Human-rated intelligibility and quality to rank systems
 
 ### Challenge documentation
 
-For further information about the challenge, please refer to:
+For detailed information about the challenge, please refer to the main website,
 
-- **[Challenge Overview](https://www.chimechallenge.org/current/task2/index)** - Complete challenge description and scenario details
-- **[Data Description](https://www.chimechallenge.org/current/task2/data)** - Dataset structure, formats, and download instructions  
-- **[Baseline System](https://www.chimechallenge.org/current/task2/baseline)** - Architecture and components of the baseline system
-- **[Challenge Rules](dhttps://www.chimechallenge.org/current/task2/rules)** - Participation rules, allowed datasets, and evaluation details
+- **[Challenge Overview](https://www.chimechallenge.org/current/task2/index)** - Full challenge description
+- **[Data Description](https://www.chimechallenge.org/current/task2/data)** - Dataset structure and access
+- **[Baseline System](https://www.chimechallenge.org/current/task2/baseline)** - System architecture and components
+- **[Challenge Rules](https://www.chimechallenge.org/current/task2/rules)** - Participation rules and evaluation guidelines
+
+---
 
 ## Getting Started
 
