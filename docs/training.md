@@ -17,15 +17,15 @@ This will unpack the data downloaded and then use them to trian a model.
 
 ## Unpack
 
-Given your downloaded dataset, stored in `paths.echi_dir`, the unpacking script
- will prepare the audio for training. Given a `model_sample_rate` and `device`,
- this script will:
+With your downloaded dataset, stored in `paths.echi_dir`, you can specify
+`model_sample_rate`, which is the sample rate input for your model, and a
+`device` (`ha` or `aria`), this script will
 
 - Resample the `device` audio and the corresponding refrences to
 `model_sample_rate` and then segment it all in to just the speech segments,
 - Resample the rainbow passages to `model_sample_rate`.
 
-The outputs of this stage will be saved into `paths.working dir` under
+The outputs of this stage will be saved into `paths.working_dir` under
 `train_segments` for the device and reference audio, and `participant` for the
 rainbow passages by default. Parameters for this stage are found in
 `config.train.unpack.yaml`.
@@ -64,7 +64,7 @@ audio and Aria glasses audio, respectively.
 
 ## Example Usage
 
-The default setting will traing the baseline:
+The default setting will train the baseline:
 
 ```bash
 python run_train.py
@@ -82,5 +82,5 @@ function. Finally, to train your model, use the command
 # If the data hasn't been unpacked
 python run_train.py model=your_enhancement_name
 # Elif the data has been unpacked
-python scripts/train/train.py
+python scripts/train/train.py model=your_enhancement_name
 ```

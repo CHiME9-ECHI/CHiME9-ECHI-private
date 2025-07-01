@@ -38,7 +38,7 @@ in turn, is presented as a dictionary storing the `mean`, `standard deviation`,
 For each `json` file there will also be a similarly named `csv` file containing
 the metric data on which the statistics were computed.
 
-## Configuring the baseline
+## Configuring Evaluation
 
 The main configuration files are located in the `config/evaluation` directory:
 

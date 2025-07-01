@@ -75,7 +75,7 @@ The baseline system expects the dataset to be placed in the `data/chime9_echi`
 This repository is set up to handle all phases of training, enhancement and evaluation.
  Each of these has it's own pipeline, which will prepare the data and perform the
  intended task.All participants are free to modify the **train** and
- **enhancement** code to obtain the best resultss possible.
+ **enhancement** code to obtain the best results possible.
 
 - **Train:** Prepares speech segments of the dataset and then trains using them.
  Details can be found on the [training page](docs/training.md).

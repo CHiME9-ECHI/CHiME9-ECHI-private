@@ -17,8 +17,6 @@ The resample step simply resamples all audio for the dev/test (defined in
 `config.enhancment.main`) and saves it. This stage only need to be run once
 for any enhancement systems which use the same sample rate.
 
-## Enhance
-
 The enhance stage loads in the resampled 36 minute wav files from above, and
 puts them through a provided enhancement system. By default, this script can
 run passthrough, which returns the first channel of audio, and the baseline
@@ -27,7 +25,7 @@ script where you can define a custom enhancement function based on your system.
 
 ## Enhancement Plugins
 
-An enhancement plugin is a Python class which should process a the full audio
+An enhancement plugin is a Python class which processes a the full audio
 from a session. The core functionality of the class is the function `process_session`,
 which takes a full session of audio and the participant speaker id audio in,
 and produces a full session of that person's speech out.
@@ -44,8 +42,9 @@ To write a custom plugin, there are two things that need adding to the code:
 the processing plugin as a Python class, and the parameters for the plugin as a
 yaml config.
 
-An example plugin is included in `enhancement_plugins`; this does the
-pasthrough processing but gives an example of how to write the class:
+An example plugin is included in `enhancement_plugins`; this simply does the
+`passthrough` processing, but can be used as a guide for how to implement your
+own enhancement plugin:
 
 ```python
 from typing import Dict
@@ -82,7 +81,8 @@ specified by `config/enhancement/main.enhancement_name`
 in `config/enhancement/enhance_args/<your-algorithm-name>.yaml`
 - **Process session:** Each class must have a `process_session` function, which
 take the audio for a full session and the participant speech audio as input,
-and outputs the enhanced audio for the full session.
+and outputs the enhanced audio for the full session. This is expected by the
+`Enhancement` protocol.
 
 Once you have defined this, you can then run the enhancement stages using
 
