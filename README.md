@@ -18,11 +18,11 @@ For detailed information on how to participate in the challenge and for obtainin
 
 ### Key Challenge Features
 
-- **Natural conversation** each of over 30 minutes with up to four persons
+- **Natural conversation** each of over 30 minutes with up to four people.
 - **49 sessions** and **196 accent-diverse speakers**
 - **High overlap** both in-conversation and with distractor talkers.
 - **Noisy background** simulating varying-loudness cafeterias
-- **Moving multi-microphone input**, from 4-channel hearing aids and 7-channel Aria glasses
+- **Moving multi-microphone input** from 4-channel hearing aids and 7-channel Aria glasses
 - **Headtracking** for all participants.
 
 ### Evaluation Metrics
@@ -35,7 +35,7 @@ Systems are evaluated using:
 
 ### Challenge documentation
 
-For detailed information about the challenge, please refer to the main website,
+For detailed information about the challenge, please refer to the main website:
 
 - **[Challenge Overview](https://www.chimechallenge.org/current/task2/index)** - Full challenge description
 - **[Data Description](https://www.chimechallenge.org/current/task2/data)** - Dataset structure and access
