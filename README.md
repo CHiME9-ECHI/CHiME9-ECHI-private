@@ -1,6 +1,43 @@
-# Baseline systems for the ECHI task of the CHiME-9 challenge
+# CHiME-9 Task 2 - ECHI Baseline
 
-## Sections
+### Enhancing Conversation to address Hearing Impairment
+
+This repository contains the baseline system for the CHiME-9 challenge, Task 2 ECHI. For detailed information on how to participate in the challenge and for obtaining the datasets, please refer to the [challenge website](https://www.chimechallenge.org/current/task2/index)
+
+## About the Challenge
+
+**CHiME-9 Task 2: Enhancing Conversations for Hearing Impairment (ECHI)** addresses the task of trying to separate conversations between known participants from noisy cafeteria-like backgrounds with low latency processing. Solutions to this problem would benefit huge numbers of people with mild hearing loss.
+
+![concept](images/echi_concept.png)
+
+### Key Challenge Features
+
+-- **Natural conversation** each of over 30 minutes with up to four persons; 49 sessions and 196 accent-diverse speakers.
+-- **High degree of overlap** both within the conversation and with distractor talkers.
+-- **Noisy background** simulating cafeteria-like environments with varying loudness.
+-- **Hearing aid audio** with 4-channel input worn by a participant; **Aria glasses audio** with 7-channel input.
+-- **Headtracking** for all conversation participants.
+
+### Evaluation Metrics
+
+Systems are evaluated on a suite of metrics and listening tests,
+
+1. **Reference based** - For estimating both quality and intelligibility
+2. **Reference free** - DNN-based intelligibility and quality metric predictors
+3. **Listening tests** - Submitted systems will be subject to speech quality and intelligibility listing tests.
+
+### Challenge documentation
+
+For further information about the challenge, please refer to:
+
+- **[Challenge Overview](https://www.chimechallenge.org/current/task2/index)** - Complete challenge description and scenario details
+- **[Data Description](<https://www.chimechallenge.org/current/task2/data>** - Dataset structure, formats, and download instructions  
+- **[Baseline System](https://www.chimechallenge.org/current/task2/baseline)** - Architecture and components of the baseline system
+- **[Challenge Rules](dhttps://www.chimechallenge.org/current/task2/rules)** - Participation rules, allowed datasets, and evaluation details
+
+## Getting Started
+
+### Sections
 
 1. <a href="#install">Installing the software</a>
 2. <a href="#data">Installing the dataset</a>
