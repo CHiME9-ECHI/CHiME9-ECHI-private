@@ -62,7 +62,7 @@ def validate_signal(
 
     # Check the enhanced signal is at least as long as the noisy signal
     # + 2 samples gives a small tolerance for differences in resamples algorithms
-    if enhanced_signal_info.frames + 2 < noisy_signal_info.frames:
+    if enhanced_signal_info.duration + 0.002 < noisy_signal_info.duration:
         error_msg = (
             f"Enhanced signal {enhanced_signal_file} is shorter than noisy signal "
             f"{noisy_signal_file}. Duration: {enhanced_signal_info.duration} < "
