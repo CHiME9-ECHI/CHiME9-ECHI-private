@@ -118,27 +118,35 @@ allowing flexibility in where the dataset is physically stored.
 
 ## <a id="stages">3. Stages</a>
 
-This repository is set up to handle all phases of training, enhancement and evaluation.
- Each of these has its own pipeline, which will prepare the data and perform the
- intended task. All participants are free to modify the **train** and
- **enhancement** code to obtain the best results possible.
+Once your environment is set up, there are three main ways you might want to use this repository:
 
-- **Train:** Prepares speech segments of the dataset and then trains using them.
- Details can be found on the [training page](docs/training.md).
-- **Enhancement:** Given a system, the enhancement pipeline produces
- audio for each full session and saves it with the correct formatting. Default
- options for passthrough and the baseline are provided, but custom options
- can be added. Details can be found on the
- [enhancement page](docs/enhancement.md).
-- **Evaluation:** Given a directory containing all the enhanced files, this
- script computes all the specified metrics over all sessions. Details can be
- found on the [evaluation page](docs/evaluation.md).
+- Evaluate enhanced signals you've generated
+- Run an enhancement system (e.g. run the baseline)
+- Train your own model
+Choose the workflow below that fits your goal:
+
+✅ **Evaluation:** If you have enhanced signals to evaluate
+
+Given a directory containing all the enhanced files, this script computes all the specified metrics over all sessions. Details can be found on the [evaluation page](docs/evaluation.md).
 
 > **⚠️ WARNING:**
 > **Evaluation code should be considered read-only.**
 > Any modifications to the evaluation scripts could lead to invalid results.
 > If there are any problems which cannot be resolved without editing the code,
 > please raise an issue and we will respond accordingly.
+
+🎧 **Enhancement:** If you want to try the baseline enhancement system
+
+Given a system, the enhancement pipeline produces
+ audio for each full session and saves it with the correct formatting. Default
+ options for passthrough and the baseline are provided, but custom options
+ can be added. Details can be found on the
+ [enhancement page](docs/enhancement.md).
+
+🧠  **Train:** If you want to train your own system
+
+Prepares speech segments of the dataset and then trains using them.
+Details can be found on the [training page](docs/training.md).
 
 ## <a id="troubleshooting">4. Troubleshooting</a>
 
