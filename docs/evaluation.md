@@ -168,7 +168,8 @@ config/evaluation/metrics_quick.yaml
 To apply this configuration, specify it via the `evaluate.score_config` parameter:
 
 ```bash
-python scripts/evaluation/evaluate.py shared.exp_name=<EXP_NAME> evaluate.score_config=config/evaluation/metrics_quick.yaml
+python scripts/evaluation/evaluate.py shared.exp_name=<EXP_NAME> \
+  evaluate.score_config=config/evaluation/metrics_quick.yaml
 ```
 
 You may edit `metrics_quick.yaml` or create a custom Versa config to tailor the metric selection further.
@@ -188,7 +189,8 @@ python scripts/evaluation/evaluate.py shared.exp_name=<EXP_NAME> evaluate.n_batc
 **Example: Evaluate the second batch out of 50:**
 
 ```bash
-python scripts/evaluation/evaluate.py shared.exp_name=<EXP_NAME> evaluate.n_batches=50 evaluate.batch=2
+python scripts/evaluation/evaluate.py shared.exp_name=<EXP_NAME> \
+  evaluate.n_batches=50 evaluate.batch=2
 ```
 
 > Tip: Batching works seamlessly with Hydra’s `--multirun` functionality, enabling parallel evaluation across processors. See [Using Multiple Processors](#processors).
@@ -205,7 +207,9 @@ You can reduce computation by filtering by device or segment type.
 **Example: Evaluate only the summed segments from the Aria glasses:**
 
 ```bash
-python scripts/evaluation/evaluate.py shared.exp_name=<EXP_NAME> evaluate.devices='[aria]' evaluate.segment_types='[summed]'
+python scripts/evaluation/evaluate.py shared.exp_name=<EXP_NAME> \
+  evaluate.devices='[aria]' \
+  evaluate.segment_types='[summed]'
 ```
 
 These filters can be combined with other options.
