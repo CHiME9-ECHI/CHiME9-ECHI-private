@@ -11,7 +11,7 @@ This document outlines the process for evaluating enhanced signals for the ECHI 
 
 ---
 
-## <a id="#prepare">1. Preparing signals for evaluation</a>
+## <a id="prepare">1. Preparing signals for evaluation</a>
 
 The evaluation code processes the complete ECHI development set. Before running, the enhanced signals must be generated and stored together in a single directory.
 
@@ -22,7 +22,7 @@ The evaluation code processes the complete ECHI development set. Before running,
 
 The evaluation pipeline includes a validation stage, which will report any issues with the signals and stop the process early if errors are found.
 
-## <a id="#evaluate">2. Running full evaluation</a>
+## <a id="evaluate">2. Running full evaluation</a>
 
 > Note: Running the full evaluation on a single CPU core, as described in this section, will take a very long time. See the following sections for how to configure a partial evaluation or use multiple processors.
 
@@ -110,7 +110,7 @@ So for the `dev` set which has 10 sessions, for each segment type, there will be
 
 For the `dev` set (10 sessions), this results in 164 report files per segment type. The reports are JSON files containing a dictionary for each metric, with statistics like `weighted mean`, `mean`, `standard deviation`, etc. The `weighted mean` (weighted by segment length) is the primary value used for reporting results. An accompanying `.csv` file is also generated for each `.json` report, containing the raw per-segment metrics.
 
-## <a id="#partial">3. Rapid partial evaluation</a>
+## <a id="partial">3. Rapid partial evaluation</a>
 
 Running the full evaluation is computationally expensive. During development, you can run a faster, partial evaluation in two ways:
 
@@ -123,7 +123,7 @@ This is achieved by editing the configuration files or by providing options on t
 Below we first provide a general [overview](#hydra) of the system configuration and then provide
 some [specific examples](#config_examples) for rapid evaluation.
 
-### <a id="#hydra">3.1 Configuration overview
+### <a id="hydra">3.1 Configuration overview
 
 The main evaluation configuration files are in the `config/evaluation` directory. Key files include:
 
@@ -146,7 +146,7 @@ You can override any configuration parameter from the command line. For example:
 python run_evaluation.py dataset=dev enhance.use_gpu=false
 ```
 
-### <a id="#config_examples"> 3.2 Configuration examples
+### <a id="config_examples"> 3.2 Configuration examples
 
 TODO: complete this section
 
@@ -154,7 +154,7 @@ TODO: complete this section
 
 #### Evaluating a subset of signals
 
-## <a id="#processors">4. Using multiple processors</a>
+## <a id="processors">4. Using multiple processors</a>
 
 The evaluation stage can be run in parallel across multiple CPU cores using Hydra's multi-run feature.
 
