@@ -120,12 +120,12 @@ Running the full evaluation is computationally expensive. During development, yo
 
 This is achieved by editing the configuration files or by providing options on the command line.
 
-Below we first provide a general [overview](#hdra) of the system configuration and then provide
+Below we first provide a general [overview](#hydra) of the system configuration and then provide
 some [specific examples](#config_examples) for rapid evaluation.
 
-### <a id="#hydra">Configuration using Hydra
+### <a id="#hydra">Configuration overview
 
-TThe main evaluation configuration files are in the `config/evaluation` directory. Key files include:
+The main evaluation configuration files are in the `config/evaluation` directory. Key files include:
 
 - `main.yaml`: Main configuration, imports other configs.
 
@@ -146,27 +146,13 @@ You can override any configuration parameter from the command line. For example:
 python run_evaluation.py dataset=dev enhance.use_gpu=false
 ```
 
-### <a id="#config_example"> Configuration for rapid evaluation
+### <a id="#config_examples"> Configuration examples
 
-For individual scripts like `scripts/evaluate.py`:
+TODO: complete this section
 
-```bash
-# Example: Evaluate a specific submission directory
-python scripts/evaluate.py evaluate.enhanced_dir=<submission_dir>
+#### Using a subset of metrics
 
-# Example: Evaluate with specific test data
-python scripts/evaluate.py evaluate.enhanced_dir=data/submission
-```
-
-Key configurable parameters include:
-
-- **Dataset:** `dataset` allows you to specify different dataset configurations.
-- **Device Settings:** Parameters like `enhance.use_gpu` (true/false) and
- `enhance.device` (e.g., 'cuda:0', 'cpu') control hardware usage.
-- **Evaluation:**
-  - `evaluate.submission`: Path to the enhanced audio or transcriptions to be evaluated.
-  - `evaluate.n_batches`, `evaluate.batch`: Control parallel processing during
- evaluation by splitting the data into batches.
+#### Evaluating a subset of signals
 
 ## <a id="#processors">4. Using multiple processors</a>
 
@@ -201,4 +187,4 @@ python run_evaluation.py evaluate.n_batches=200 evaluate.batch='range(1,201)' \
  example from 1 to 10, you would use `evaluate.batch='range(1,11)'`.
 
 If using an HPC cluster with Slurm, please review and edit
- `config/hydra/launcher/echi_submitit_slurm.yaml` to match your system's configuration.
+ `config/hydra/launcher/echi_submitit_slurm.yaml` to match your system's configuration.gi
