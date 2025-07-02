@@ -123,7 +123,7 @@ This is achieved by editing the configuration files or by providing options on t
 Below we first provide a general [overview](#hydra) of the system configuration and then provide
 some [specific examples](#config_examples) for rapid evaluation.
 
-### <a id="#hydra">Configuration overview
+### <a id="#hydra">3.1 Configuration overview
 
 The main evaluation configuration files are in the `config/evaluation` directory. Key files include:
 
@@ -146,7 +146,7 @@ You can override any configuration parameter from the command line. For example:
 python run_evaluation.py dataset=dev enhance.use_gpu=false
 ```
 
-### <a id="#config_examples"> Configuration examples
+### <a id="#config_examples"> 3.2 Configuration examples
 
 TODO: complete this section
 
